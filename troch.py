@@ -12,17 +12,30 @@ from turtle import \
     Vec2D
 # import cairo
 
+def interpolator(f) :
+    "marks f as an interpolator."
+    f.is_interpolator = True
+    return f
+#end interpolator
+
+function = type(lambda x : x)
+
+def is_interpolator(f) :
+    "checks if f is an interpolator function."
+    return type(f) == function and hasattr(f, "is_interpolator") and f.is_interpolator
+#endd is_interpolator
+
 def constant_interpolator(y) :
     "returns a function of x that always returns the same constant value y."
     return \
-        lambda x : y
+        interpolator(lambda x : y)
 #end constant_interpolator
 
 def linear_interpolator(from_x, to_x, from_y, to_y) :
     "returns a function of x in the range [from_x .. to_x] which returns" \
     " the corresponding linearly-interpolated value in the range [from_y .. to_y]."
     return \
-        lambda x : (x - from_x) / (to_x - from_x) * (to_y - from_y) + from_y
+        interpolator(lambda x : (x - from_x) / (to_x - from_x) * (to_y - from_y) + from_y)
 #end linear_interpolator
 
 def piecewise_linear_interpolator(x_vals, y_vals) :
@@ -32,6 +45,7 @@ def piecewise_linear_interpolator(x_vals, y_vals) :
     " range segments. returns a function that will map an input x value to" \
     " the corresponding y value linearly-interpolated over the appropriate segment."
 
+    @interpolator
     def interpolate(x) :
         i = len(x_vals)
         while True :
@@ -65,14 +79,13 @@ def tuple_interpolator(*interps) :
     if len(interps) == 1 and type(interps[0]) == tuple :
         interps = interps[0]
     #end if
-    function = type(lambda x : x)
     interps = tuple \
       (
-        interp if type(interp) == function else constant_interpolator(interp)
+        interp if is_interpolator(interp) else constant_interpolator(interp)
         for interp in interps
       )
     return \
-        lambda x : tuple(interp(x) for interp in interps)
+        interpolator(lambda x : tuple(interp(x) for interp in interps))
 #end tuple_interpolator
 
 def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
@@ -107,18 +120,16 @@ def make_settings_applicator(*anim_settings) :
     " an argument list  equal to the result of the corresponding interpolator applied to" \
     " that value of x."
 
-    function = type(lambda x : x)
-
     def apply_settings(g, x) :
         for method, interp in anim_settings :
-            if type(interp) == tuple :
+            if is_interpolator(interp) :
+                args = interp(x)
+            else : # assume tuple
                 args = tuple \
                   (
-                    arg(x) if type(arg) == function else arg
+                    arg(x) if is_interpolator(arg) else arg
                     for arg in interp
                   )
-            else :
-                args = interp(x)
             #end if
             getattr(g, method)(*args)
         #end for
@@ -148,12 +159,11 @@ class AnimCurve :
         nr_steps,
         do_settings = None
       ) :
-        function = type(lambda x : x)
-        self.ring_radius_interp = ring_radius if type(ring_radius) == function else constant_interpolator(ring_radius)
-        self.wheel_radius_interp = wheel_radius if type(wheel_radius) == function else constant_interpolator(wheel_radius)
-        self.wheel_frac_interp = wheel_frac if type(wheel_frac) == function else constant_interpolator(wheel_frac)
-        self.phase_interp = phase if type(phase) == function else constant_interpolator(phase)
-        self.nr_steps_interp = nr_steps if type(nr_steps) == function else constant_interpolator(nr_steps)
+        self.ring_radius_interp = ring_radius if is_interpolator(ring_radius) else constant_interpolator(ring_radius)
+        self.wheel_radius_interp = wheel_radius if is_interpolator(wheel_radius) else constant_interpolator(wheel_radius)
+        self.wheel_frac_interp = wheel_frac if is_interpolator(wheel_frac) else constant_interpolator(wheel_frac)
+        self.phase_interp = phase if is_interpolator(phase) else constant_interpolator(phase)
+        self.nr_steps_interp = nr_steps if is_interpolator(nr_steps) else constant_interpolator(nr_steps)
         self.do_settings = do_settings
     #end __init__
 
