@@ -60,9 +60,9 @@ def piecewise_linear_interpolator(x_vals, y_vals) :
 #end piecewise_linear_interpolator
 
 def tuple_interpolator(*interps) :
-    "given a tuple of interpolators, returns a function of x which will yield the" \
-    " corresponding tuple of interpolated y-values for a given x."
-    if len(interps) == 1 :
+    "given a tuple of interpolators or constant values, returns a function of x which will" \
+    " yield the corresponding tuple of interpolated y-values for a given x."
+    if len(interps) == 1 and type(interps[0]) == tuple :
         interps = interps[0]
     #end if
     function = type(lambda x : x)
@@ -99,27 +99,35 @@ def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
 
 def make_settings_applicator(*anim_settings) :
     "anim_settings must be a tuple of 2-tuples; in each 2-tuple, the first element is" \
-    " a Cairo context method name, and the second element is an interpolator function" \
-    " that returns a tuple. returns a procedure of 2 arguments, a Cairo context g and" \
-    " the current time x, which will call each Cairo method on g with an argument list" \
-    " equal to the result of the corresponding interpolator applied to that value of x."
+    " a Cairo context method name, and the second element is a tuple of arguments to that" \
+    " method, or an interpolator function returning such a tuple. If the second element is" \
+    " a tuple, then each element is either a corresponding argument value, or an interpolator" \
+    " that evaluates to such an argument value. This function returns a procedure of 2 arguments," \
+    " a Cairo context g and the current time x, which will call each Cairo method on g with" \
+    " an argument list  equal to the result of the corresponding interpolator applied to" \
+    " that value of x."
+
+    function = type(lambda x : x)
 
     def apply_settings(g, x) :
         for method, interp in anim_settings :
-            getattr(g, method)(*interp(x))
+            if type(interp) == tuple :
+                args = tuple \
+                  (
+                    arg(x) if type(arg) == function else arg
+                    for arg in interp
+                  )
+            else :
+                args = interp(x)
+            #end if
+            getattr(g, method)(*args)
         #end for
     #end apply_settings
 
 #begin make_settings_applicator
-    if len(anim_settings) == 1 :
+    if len(anim_settings) == 1 and type(anim_settings[0]) == tuple :
         anim_settings = anim_settings[0]
     #end if
-    function = type(lambda x : x)
-    anim_settings = tuple \
-      (
-        (method, interp if type(interp) == function else constant_interpolator(interp))
-        for method, interp in anim_settings
-      )
     return \
         apply_settings
 #end make_settings_applicator
