@@ -59,9 +59,12 @@ def piecewise_linear_interpolator(x_vals, y_vals) :
         interpolate
 #end piecewise_linear_interpolator
 
-def tuple_interpolator(interps) :
+def tuple_interpolator(*interps) :
     "given a tuple of interpolators, returns a function of x which will yield the" \
     " corresponding tuple of interpolated y-values for a given x."
+    if len(interps) == 1 :
+        interps = interps[0]
+    #end if
     function = type(lambda x : x)
     interps = tuple \
       (
@@ -94,7 +97,7 @@ def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
     g.stroke()
 #end draw
 
-def make_settings_applicator(anim_settings) :
+def make_settings_applicator(*anim_settings) :
     "anim_settings must be a tuple of 2-tuples; in each 2-tuple, the first element is" \
     " a Cairo context method name, and the second element is an interpolator function" \
     " that returns a tuple. returns a procedure of 2 arguments, a Cairo context g and" \
@@ -108,6 +111,9 @@ def make_settings_applicator(anim_settings) :
     #end apply_settings
 
 #begin make_settings_applicator
+    if len(anim_settings) == 1 :
+        anim_settings = anim_settings[0]
+    #end if
     function = type(lambda x : x)
     anim_settings = tuple \
       (
