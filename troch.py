@@ -94,12 +94,12 @@ def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
     g.stroke()
 #end draw
 
-def make_cairo_settings(anim_settings) :
+def make_settings_applicator(anim_settings) :
     "anim_settings must be a tuple of 2-tuples; in each 2-tuple, the first element is" \
-    " a Cairo context method name, and the second element is an interpolator function." \
-    " returns a procedure of 2 arguments, a Cairo context g and the current time x," \
-    " which will call each Cairo method on g with an argument list equal to the result" \
-    " of the corresponding interpolator applied to that value of x."
+    " a Cairo context method name, and the second element is an interpolator function" \
+    " that returns a tuple. returns a procedure of 2 arguments, a Cairo context g and" \
+    " the current time x, which will call each Cairo method on g with an argument list" \
+    " equal to the result of the corresponding interpolator applied to that value of x."
 
     def apply_settings(g, x) :
         for method, interp in anim_settings :
@@ -107,7 +107,7 @@ def make_cairo_settings(anim_settings) :
         #end for
     #end apply_settings
 
-#begin make_cairo_settings
+#begin make_settings_applicator
     function = type(lambda x : x)
     anim_settings = tuple \
       (
@@ -116,7 +116,7 @@ def make_cairo_settings(anim_settings) :
       )
     return \
         apply_settings
-#end make_cairo_settings
+#end make_settings_applicator
 
 class AnimCurve :
     "represents an animating trochoid curve. Pass interpolator functions to the constructor" \
