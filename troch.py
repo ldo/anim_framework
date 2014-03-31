@@ -108,8 +108,6 @@ def cyclic_interpolator(from_x, to_x, interp, offset = 0) :
     "given an existing interpolator defined over the domain [from_x, to_x], returns" \
     " an interpolator which repeats the same function over equal-sized intervals" \
     " before and after the original domain."
-
-#begin cyclic_interpolator
     return \
         interpolator \
           (
