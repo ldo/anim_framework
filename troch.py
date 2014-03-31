@@ -8,8 +8,9 @@
 
 from fractions import \
     Fraction
+import colorsys
 from turtle import \
-    Vec2D
+    Vec2D # handy, but note positive rotations go clockwise
 # import cairo
 
 def interpolator(f) :
@@ -38,39 +39,54 @@ def linear_interpolator(from_x, to_x, from_y, to_y) :
         interpolator(lambda x : (x - from_x) / (to_x - from_x) * (to_y - from_y) + from_y)
 #end linear_interpolator
 
+def piecewise_interpolator(x_vals, interps) :
+    "x_vals must be a monotonically-increasing sequence of x-values, defining" \
+    " domain segments, and interps must be a tuple of interpolator functions," \
+    " one less in length. interps[i] is used for x values in the range" \
+    " x_vals[i] .. x_vals[i + 1]. The x value is first normalized to [0 .. 1]" \
+    " over this range, and the returned ranges from interpolators after the first one" \
+    " are adjusted, each relative to the previous one, to ensure the overall" \
+    " interpolation is piecewise continuous."
+
+    @interpolator
+    def interpolate(x) :
+        y_offset = 0
+        i = 0
+        while True :
+            if i >= len(interps) - 1 or x_vals[i + 1] >= x :
+                y = interps[i]((x - x_vals[i]) / (x_vals[i + 1] - x_vals[i])) + y_offset
+                break
+            #end if
+            y_offset += interps[i](1) - interps[i + 1](0)
+            i += 1
+        #end while
+        return y
+    #end interpolate
+
+#begin piecewise_interpolator
+    assert len(x_vals) >= 2 and len(interps) + 1 == len(x_vals)
+    interps = tuple(f if is_interpolator(f) else constant_interpolator(f) for f in interps)
+    return \
+        interpolate
+#end piecewise_interpolator
+
 def piecewise_linear_interpolator(x_vals, y_vals) :
     "x_vals must be a monotonically-increasing sequence of x-values, defining" \
     " domain segments, and y_vals must be a monotically-increasing sequence of" \
     " the same length of corresponding y-values defining piecewise-linear" \
     " range segments. returns a function that will map an input x value to" \
     " the corresponding y value linearly-interpolated over the appropriate segment."
-
-    @interpolator
-    def interpolate(x) :
-        i = len(x_vals)
-        while True :
-            i -= 1
-            if x_vals[i] <= x :
-                break
-        #end while
-        return \
-            (
-                lambda : x_vals[i],
-                lambda :
-                            (x - x_vals[i])
-                        /
-                            (x_vals[i + 1] - x_vals[i])
-                        *
-                            (y_vals[i + 1] - y_vals[i])
-                    +
-                        y_vals[i],
-            )[x > x_vals[i]]()
-    #end interpolate
-
-#begin piecewise_linear_interpolator
     assert len(x_vals) >= 2 and len(x_vals) == len(y_vals)
     return \
-        interpolate
+        piecewise_interpolator \
+          (
+            x_vals,
+            tuple
+              (
+                linear_interpolator(0, 1, y_vals[i], y_vals[i + 1])
+                for i in range(0, x_vals - 1)
+              )
+          )
 #end piecewise_linear_interpolator
 
 def tuple_interpolator(*interps) :
@@ -87,6 +103,19 @@ def tuple_interpolator(*interps) :
     return \
         interpolator(lambda x : tuple(interp(x) for interp in interps))
 #end tuple_interpolator
+
+def hsv_to_rgb_interpolator(h, s, v) :
+    return interpolator \
+      (
+        lambda x :
+            colorsys.hsv_to_rgb
+              (
+                h = h(x) if is_interpolator(h) else h,
+                s = s(x) if is_interpolator(s) else s,
+                v = v(x) if is_interpolator(v) else v
+              )
+      )
+#end hsv_to_rgb_interpolator
 
 def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
     "draws a trochoid curve into the Cairo context g. ring_radius is the radius of the" \
