@@ -24,7 +24,7 @@ function = type(lambda x : x)
 def is_interpolator(f) :
     "checks if f is an interpolator function."
     return type(f) == function and hasattr(f, "is_interpolator") and f.is_interpolator
-#endd is_interpolator
+#end is_interpolator
 
 def constant_interpolator(y) :
     "returns a function of x that always returns the same constant value y."
@@ -103,6 +103,27 @@ def tuple_interpolator(*interps) :
     return \
         interpolator(lambda x : tuple(interp(x) for interp in interps))
 #end tuple_interpolator
+
+def step_interpolator(x_vals, y_vals) :
+    "x_vals must be a tuple of monotonically increasing values, and y_vals a tuple" \
+    " with a length one less. returns an interpolator that returns y_vals[i] when" \
+    " x_vals[i] ≤ x ≤ x_vals[i + 1]."
+
+    @interpolator
+    def step_interpolate(x) :
+        i = len(x_vals) - 2
+        while x_vals[i] > x :
+            i -= 1
+        #end while
+        return \
+            y_vals[i]
+    #end step_interpolate
+
+#begin step_interpolator
+    assert len(x_vals) >= 2 and len(x_vals) == len(y_vals) + 1
+    return \
+        step_interpolate
+#end step_interpolator
 
 def hsv_to_rgb_interpolator(h, s, v) :
     "given h, s, v interpolators or constant values, returns an interpolator that" \
