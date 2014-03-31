@@ -104,7 +104,7 @@ def tuple_interpolator(*interps) :
         interpolator(lambda x : tuple(interp(x) for interp in interps))
 #end tuple_interpolator
 
-def cyclic_interpolator(from_x, to_x, interp) :
+def cyclic_interpolator(from_x, to_x, interp, offset = 0) :
     "given an existing interpolator defined over the domain [from_x, to_x], returns" \
     " an interpolator which repeats the same function over equal-sized intervals" \
     " before and after the original domain."
@@ -113,7 +113,7 @@ def cyclic_interpolator(from_x, to_x, interp) :
     return \
         interpolator \
           (
-            lambda x : interp(x % (to_x - from_x) + from_x)
+            lambda x : interp(x % (to_x - from_x) + from_x - offset)
           )
 #end cyclic_interpolator
 
