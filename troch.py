@@ -106,7 +106,7 @@ def tuple_interpolator(*interps) :
 
 def hsv_to_rgb_interpolator(h, s, v) :
     "given h, s, v interpolators or constant values, returns an interpolator that" \
-    " converts the interpolated value to an (r, g, b) tuple. Handy for Cairo functions" \
+    " converts the interpolated values to an (r, g, b) tuple. Handy for Cairo functions" \
     " that only take r, g, b colours, because animating in HSV space usually gives more" \
     " useful effects."
     return interpolator \
