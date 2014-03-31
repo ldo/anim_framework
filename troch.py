@@ -113,7 +113,7 @@ def cyclic_interpolator(from_x, to_x, interp, offset = 0) :
     return \
         interpolator \
           (
-            lambda x : interp(x % (to_x - from_x) + from_x - offset)
+            lambda x : interp((x - offset) % (to_x - from_x) + from_x)
           )
 #end cyclic_interpolator
 
