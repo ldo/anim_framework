@@ -153,6 +153,13 @@ def hsv_to_rgb_interpolator(h, s, v) :
       )
 #end hsv_to_rgb_interpolator
 
+def transform_interpolator(interp, scale, offset) :
+    "returns an interpolator which is interp operating on an x-coordinate subjected" \
+    " to the specified scale and offset."
+    return \
+        interpolator(lambda x : interp((x - offset) / scale))
+#end transform_interpolator
+
 def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
     "draws a trochoid curve into the Cairo context g. ring_radius is the radius of the" \
     " stationary ring, while wheel_radius is the radius of the moving wheel; both must" \
