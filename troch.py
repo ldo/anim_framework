@@ -174,7 +174,7 @@ def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
     for i in range(0, nr_steps + 1) :
         theta_ring = 360 * nr_cycles * i / nr_steps
         theta_wheel = theta_ring * (ring_radius / wheel_radius + 1)
-        wheel_pos = Vec2D(ring_radius, 0).rotate(theta_ring + phase)
+        wheel_pos = Vec2D(ring_radius + wheel_radius, 0).rotate(theta_ring + phase)
         curve_pos = wheel_pos + Vec2D(wheel_radius * wheel_frac, 0).rotate(theta_wheel)
         setpos(curve_pos[0], curve_pos[1])
         setpos = g.line_to # for subsequent points
