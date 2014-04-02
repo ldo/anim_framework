@@ -1,20 +1,27 @@
 #+
-# Framework for generating animations of trochoid patterns.
-# For background on the maths, see <https://en.wikipedia.org/wiki/Spirograph>,
-# <https://en.wikipedia.org/wiki/Epitrochoid> and <https://en.wikipedia.org/wiki/Hypotrochoid>.
+# Framework for doing various animations of drawing into a Cairo
+# graphics context.
+#
+# An “interpolator” is a function of a scalar value x (representing time)
+# and returning anything. This module provides various predefined forms
+# of interpolator, as well as functions for composing them into new
+# interpolators, and you are free to add your own. But make sure to put
+# your function through the “interpolator” function below (which can be
+# used as a decorator). This allows you to freely pass combinations
+# of interpolators and constant values into the animation framework, and
+# it can automatically tell which values are animated and which are not.
 #
 # Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 #-
 
-from fractions import \
-    Fraction
+import os
+import math
 import colorsys
-from turtle import \
-    Vec2D # handy, but note positive rotations go clockwise
-# import cairo
+import cairo
 
 def interpolator(f) :
-    "marks f as an interpolator."
+    "marks f as an interpolator. All functions to be used as interpolators" \
+    " should be put through this."
     f.is_interpolator = True
     return f
 #end interpolator
@@ -136,6 +143,13 @@ def step_interpolator(x_vals, y_vals) :
         step_interpolate
 #end step_interpolator
 
+def transform_interpolator(interp, scale, offset) :
+    "returns an interpolator which is interp operating on an x-coordinate subjected" \
+    " to the specified scale and offset."
+    return \
+        interpolator(lambda x : interp((x - offset) / scale))
+#end transform_interpolator
+
 def hsv_to_rgb_interpolator(h, s, v) :
     "given h, s, v interpolators or constant values, returns an interpolator that" \
     " converts the interpolated values to an (r, g, b) tuple. Handy for Cairo functions" \
@@ -153,36 +167,26 @@ def hsv_to_rgb_interpolator(h, s, v) :
       )
 #end hsv_to_rgb_interpolator
 
-def transform_interpolator(interp, scale, offset) :
-    "returns an interpolator which is interp operating on an x-coordinate subjected" \
-    " to the specified scale and offset."
-    return \
-        interpolator(lambda x : interp((x - offset) / scale))
-#end transform_interpolator
+def hsva_to_rgba_interpolator(h, s, v, a) :
+    "given h, s, v, a interpolators or constant values, returns an interpolator that" \
+    " converts the interpolated values to an (r, g, b, a) tuple."
+    return interpolator \
+      (
+        lambda x :
+                colorsys.hsv_to_rgb
+                  (
+                    h = h(x) if is_interpolator(h) else h,
+                    s = s(x) if is_interpolator(s) else s,
+                    v = v(x) if is_interpolator(v) else v
+                  )
+            +
+                (
+                    a(x) if is_interpolator(a) else a,
+                )
+      )
+#end hsv_to_rgb_interpolator
 
-def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
-    "draws a trochoid curve into the Cairo context g. ring_radius is the radius of the" \
-    " stationary ring, while wheel_radius is the radius of the moving wheel; both must" \
-    " be integers. frac is the fraction of the wheel radius that the actual" \
-    " point on the curve is located from the centre of the wheel. nr_steps is the" \
-    " number of straight-line segments to use to approximate the curve." \
-    " Setting up pen size, draw pattern etc is left up to caller."
-    ratio = Fraction(ring_radius, wheel_radius)
-    nr_cycles = ratio.denominator # to produce one complete traversal of curve
-    g.new_path()
-    setpos = g.move_to # for first point
-    for i in range(0, nr_steps + 1) :
-        theta_ring = 360 * nr_cycles * i / nr_steps
-        theta_wheel = theta_ring * (ring_radius / wheel_radius + 1)
-        wheel_pos = Vec2D(ring_radius + wheel_radius, 0).rotate(theta_ring + phase)
-        curve_pos = wheel_pos + Vec2D(wheel_radius * wheel_frac, 0).rotate(theta_wheel)
-        setpos(curve_pos[0], curve_pos[1])
-        setpos = g.line_to # for subsequent points
-    #end for
-    g.stroke()
-#end draw
-
-def make_settings_applicator(*anim_settings) :
+def make_applicator(*anim_settings) :
     "anim_settings must be a tuple of 2-tuples; in each 2-tuple, the first element is" \
     " a Cairo context method name, and the second element is a tuple of arguments to that" \
     " method, or an interpolator function returning such a tuple. If the second element is" \
@@ -207,54 +211,112 @@ def make_settings_applicator(*anim_settings) :
         #end for
     #end apply_settings
 
-#begin make_settings_applicator
+#begin make_applicator
     if len(anim_settings) == 1 and type(anim_settings[0]) == tuple :
         anim_settings = anim_settings[0]
     #end if
     return \
         apply_settings
-#end make_settings_applicator
+#end make_applicator
 
-class AnimCurve :
-    "represents an animating trochoid curve. Pass interpolator functions to the constructor" \
-    " which will evaluate to appropriate values for the curve parameters for given x." \
-    " Then call the draw method, passing it a Cairo context and a value for x, and a curve" \
-    " will be drawn into that context with the corresponding parameters."
+def draw_curve(g, f, closed, nr_steps) :
+    "g is a Cairo context, f is a function over [0, 1) returning a tuple of" \
+    " (x, y) coordinates, defining the curve to draw, and nr_steps is the" \
+    " number of straight-line segments to approximate the curve. if closed," \
+    " then the end and start points will be joined by an additional segment." \
+    " The path will be stroked with the current settings in g."
+    g.new_path()
+    setpos = g.move_to # for first point
+    for i in range(0, nr_steps) :
+        setpos(*f(i / nr_steps))
+        setpos = g.line_to # for subsequent points
+    #end for
+    if closed :
+        g.close_path()
+    #end if
+    g.stroke()
+#end draw_curve
 
-    def __init__ \
-      (
-        self,
-        ring_radius,
-        wheel_radius,
-        wheel_frac,
-        phase,
-        nr_steps,
-        do_settings = None
-      ) :
-        self.ring_radius_interp = ring_radius if is_interpolator(ring_radius) else constant_interpolator(ring_radius)
-        self.wheel_radius_interp = wheel_radius if is_interpolator(wheel_radius) else constant_interpolator(wheel_radius)
-        self.wheel_frac_interp = wheel_frac if is_interpolator(wheel_frac) else constant_interpolator(wheel_frac)
-        self.phase_interp = phase if is_interpolator(phase) else constant_interpolator(phase)
-        self.nr_steps_interp = nr_steps if is_interpolator(nr_steps) else constant_interpolator(nr_steps)
-        self.do_settings = do_settings
-    #end __init__
+class NullAnim :
+    "base-ish class for animatable objects."
 
     def draw(self, g, x) :
-        "draws a trochoid into the Cairo context g with the animated settings" \
-        " appropriate to time x."
-        if self.do_settings != None :
-            self.do_settings(g, x)
-        #end if
-        # note ring_radius, wheel_radius and nr_steps must be integers
-        draw \
-          (
-            g = g,
-            ring_radius = round(self.ring_radius_interp(x)),
-            wheel_radius = round(self.wheel_radius_interp(x)),
-            wheel_frac = self.wheel_frac_interp(x),
-            phase = self.phase_interp(x),
-            nr_steps = round(self.nr_steps_interp(x))
-          )
+        "does drawing of shape into Cairo context g at animation time x."
+        pass # me, I do nothing
     #end draw
 
-#end AnimCurve
+#end NullAnim
+
+class VariantAnim(NullAnim) :
+    "an animatable object which does some custom setup before drawing another" \
+    " animatable object. Handy for creating variants of an animatable where" \
+    " this is simpler than creating a new animatable from scratch each time."
+
+    def __init__(self, presetup, childanim) :
+        self.presetup = presetup
+        self.childanim = childanim
+    #end __init_-
+
+    def draw(self, g, x) :
+        self.presetup(g, x)
+        self.childanim.draw(g, x)
+    #end draw
+
+#end VariantAnim
+
+class ApplicatorAnim(NullAnim) :
+    "an animatable object which just does a sequence of Cairo calls into" \
+    " the given context. Constructor arguments are the same as for make_applicator" \
+    " (above)."
+
+    def __init__(self, *settings) :
+        self.draw = make_applicator(settings)
+    #end __init__
+
+#end ApplicatorAnim
+
+def render_anim \
+  (
+    width,
+    height,
+    start_time,
+    end_time,
+    frame_rate,
+    anim_objects, # sequence of NullAnim or similar
+    overall_presetup, # called to do once-off setup of Cairo context
+    frame_presetup, # called at start of rendering each frame
+    frame_postsetup, # called at end of rendering each frame
+    out_dir, # where to write numbered PNG frames
+    start_frame_nr # frame number corresponding to time 0
+  ) :
+    pix = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+    g = cairo.Context(pix)
+    if overall_presetup != None :
+        overall_presetup(g)
+    #end if
+    from_frame_nr = math.ceil(start_time * frame_rate)
+    to_frame_nr = math.floor(end_time * frame_rate) + 1
+    for frame_nr in range(from_frame_nr, to_frame_nr) :
+        g.save()
+        t = frame_nr / frame_rate
+        if frame_presetup != None :
+            frame_presetup(g, t)
+        #end if
+        for anim_object in anim_objects :
+            g.save()
+            anim_object.draw(g, t)
+            g.restore()
+        #end for
+        if frame_postsetup != None :
+            frame_postsetup(g, t)
+        #end if
+        g.restore()
+        pix.flush()
+        pix.write_to_png \
+          (
+            os.path.join(out_dir, "%04d.png" % (frame_nr + start_frame_nr))
+          )
+    #end for
+    return \
+        (from_frame_nr, to_frame_nr)
+#end render_anim
