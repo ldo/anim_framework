@@ -11,13 +11,20 @@
 # of interpolators and constant values into the animation framework, and
 # it can automatically tell which values are animated and which are not.
 #
-# Written by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# A draw procedure takes two arguments (g, t), g being a Cairo context
+# into which to draw the current frame, and t being the current frame time.
+#
+# Copyright 2014 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 #-
 
 import os
 import math
 import colorsys
 import cairo
+
+#+
+# Interpolators
+#-
 
 def interpolator(f) :
     "marks f as an interpolator. All functions to be used as interpolators" \
@@ -186,18 +193,25 @@ def hsva_to_rgba_interpolator(h, s, v, a) :
       )
 #end hsv_to_rgb_interpolator
 
-def make_applicator(*anim_settings) :
-    "anim_settings must be a tuple of 2-tuples; in each 2-tuple, the first element is" \
+#+
+# Draw procedures
+#-
+
+def null_draw(g, x) :
+    "a draw function which does nothing."
+    pass
+#end null_draw
+
+def make_draw(*draw_settings) :
+    "draw_settings must be a tuple of 2-tuples; in each 2-tuple, the first element is" \
     " a Cairo context method name, and the second element is a tuple of arguments to that" \
     " method, or an interpolator function returning such a tuple. If the second element is" \
     " a tuple, then each element is either a corresponding argument value, or an interpolator" \
-    " that evaluates to such an argument value. This function returns a procedure of 2 arguments," \
-    " a Cairo context g and the current time x, which will call each Cairo method on g with" \
-    " an argument list  equal to the result of the corresponding interpolator applied to" \
-    " that value of x."
+    " that evaluates to such an argument value. This function returns a draw procedure" \
+    " that applies the specified settings to a given Cairo context at the specified time."
 
     def apply_settings(g, x) :
-        for method, interp in anim_settings :
+        for method, interp in draw_settings :
             if is_interpolator(interp) :
                 args = interp(x)
             else : # assume tuple
@@ -211,13 +225,37 @@ def make_applicator(*anim_settings) :
         #end for
     #end apply_settings
 
-#begin make_applicator
-    if len(anim_settings) == 1 and type(anim_settings[0]) == tuple :
-        anim_settings = anim_settings[0]
+#begin make_draw
+    if len(draw_settings) == 1 and type(draw_settings[0]) == tuple :
+        draw_settings = draw_settings[0]
     #end if
     return \
         apply_settings
-#end make_applicator
+#end make_draw
+
+def draw_sequence(*draw_procs) :
+    "given a sequence of draw procedures, returns a draw procedure that invokes" \
+    " them in turn. The Cairo context is saved/restored around each one."
+
+    def apply_sequence(g, x) :
+        for proc in draw_procs :
+            g.save()
+            proc(g, x)
+            g.restore()
+        #end for
+    #end apply_sequence
+
+#begin draw_sequence
+    if len(draw_procs) == 1 and type(draw_procs[0]) == tuple :
+        draw_procs = draw_procs[0]
+    #end if
+    return \
+        apply_sequence
+#end draw_sequence
+
+#+
+# Higher-level useful stuff
+#-
 
 def draw_curve(g, f, closed, nr_steps) :
     "g is a Cairo context, f is a function over [0, 1) returning a tuple of" \
@@ -237,44 +275,6 @@ def draw_curve(g, f, closed, nr_steps) :
     g.stroke()
 #end draw_curve
 
-class NullAnim :
-    "base-ish class for animatable objects."
-
-    def draw(self, g, x) :
-        "does drawing of shape into Cairo context g at animation time x."
-        pass # me, I do nothing
-    #end draw
-
-#end NullAnim
-
-class VariantAnim(NullAnim) :
-    "an animatable object which does some custom setup before drawing another" \
-    " animatable object. Handy for creating variants of an animatable where" \
-    " this is simpler than creating a new animatable from scratch each time."
-
-    def __init__(self, presetup, childanim) :
-        self.presetup = presetup
-        self.childanim = childanim
-    #end __init_-
-
-    def draw(self, g, x) :
-        self.presetup(g, x)
-        self.childanim.draw(g, x)
-    #end draw
-
-#end VariantAnim
-
-class ApplicatorAnim(NullAnim) :
-    "an animatable object which just does a sequence of Cairo calls into" \
-    " the given context. Constructor arguments are the same as for make_applicator" \
-    " (above)."
-
-    def __init__(self, *settings) :
-        self.draw = make_applicator(settings)
-    #end __init__
-
-#end ApplicatorAnim
-
 def render_anim \
   (
     width,
@@ -282,13 +282,12 @@ def render_anim \
     start_time,
     end_time,
     frame_rate,
-    anim_objects, # sequence of NullAnim or similar
+    draw_frame, # draw procedure
     overall_presetup, # called to do once-off setup of Cairo context
-    frame_presetup, # called at start of rendering each frame
-    frame_postsetup, # called at end of rendering each frame
     out_dir, # where to write numbered PNG frames
     start_frame_nr # frame number corresponding to time 0
   ) :
+    "renders out an animation to a sequence of PNG image files."
     pix = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
     g = cairo.Context(pix)
     if overall_presetup != None :
@@ -299,17 +298,7 @@ def render_anim \
     for frame_nr in range(from_frame_nr, to_frame_nr) :
         g.save()
         t = frame_nr / frame_rate
-        if frame_presetup != None :
-            frame_presetup(g, t)
-        #end if
-        for anim_object in anim_objects :
-            g.save()
-            anim_object.draw(g, t)
-            g.restore()
-        #end for
-        if frame_postsetup != None :
-            frame_postsetup(g, t)
-        #end if
+        draw_frame(g, t)
         g.restore()
         pix.flush()
         pix.write_to_png \
