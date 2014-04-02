@@ -11,9 +11,6 @@ from fractions import \
 from turtle import \
     Vec2D
 import anim_common
-from anim_common import \
-    is_interpolator, \
-    constant_interpolator
 
 def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
     "draws a trochoid curve into the Cairo context g. ring_radius is the radius of the" \
@@ -39,21 +36,11 @@ def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
 def make_draw(ring_radius, wheel_radius, wheel_frac, phase, nr_steps, do_settings = None) :
     "returns a draw procedure which will draw a trochoid curve with the specified animatable" \
     " parameters."
-    if not is_interpolator(ring_radius) :
-        ring_radius = constant_interpolator(ring_radius)
-    #end if
-    if not is_interpolator(wheel_radius) :
-        wheel_radius = constant_interpolator(wheel_radius)
-    #end if
-    if not is_interpolator(wheel_frac) :
-        wheel_frac = constant_interpolator(wheel_frac)
-    #end if
-    if not is_interpolator(phase) :
-        phase = constant_interpolator(phase)
-    #end if
-    if not is_interpolator(nr_steps) :
-        nr_steps = constant_interpolator(nr_steps)
-    #end if
+    ring_radius = anim_common.ensure_interpolator(ring_radius)
+    wheel_radius = anim_common.ensure_interpolator(wheel_radius)
+    wheel_frac = anim_common.ensure_interpolator(wheel_frac)
+    phase = anim_common.ensure_interpolator(phase)
+    nr_steps = anim_common.ensure_interpolator(nr_steps)
 
     def apply_draw(g, x) :
         "draws a trochoid into the Cairo context g with the animated settings" \

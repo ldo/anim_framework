@@ -9,9 +9,6 @@ from fractions import \
     Fraction
 import math
 import anim_common
-from anim_common import \
-    is_interpolator, \
-    constant_interpolator
 
 def draw(g, x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps) :
 
@@ -49,27 +46,13 @@ def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, do_setti
           )
     #end apply_draw
 
-    if not is_interpolator(x_amp) :
-        x_amp = constant_interpolator(x_amp)
-    #end if
-    if not is_interpolator(x_freq) :
-        x_freq = constant_interpolator(x_freq)
-    #end if
-    if not is_interpolator(x_phase) :
-        x_phase = constant_interpolator(x_phase)
-    #end if
-    if not is_interpolator(y_amp) :
-        y_amp = constant_interpolator(y_amp)
-    #end if
-    if not is_interpolator(y_freq) :
-        y_freq = constant_interpolator(y_freq)
-    #end if
-    if not is_interpolator(y_phase) :
-        y_phase = constant_interpolator(y_phase)
-    #end if
-    if not is_interpolator(nr_steps) :
-        nr_steps = constant_interpolator(nr_steps)
-    #end if
+    x_amp = anim_common.ensure_interpolator(x_amp)
+    x_freq = anim_common.ensure_interpolator(x_freq)
+    x_phase = anim_common.ensure_interpolator(x_phase)
+    y_amp = anim_common.ensure_interpolator(y_amp)
+    y_freq = anim_common.ensure_interpolator(y_freq)
+    y_phase = anim_common.ensure_interpolator(y_phase)
+    nr_steps = anim_common.ensure_interpolator(nr_steps)
     return \
         apply_draw
 #end make_draw

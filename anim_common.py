@@ -46,6 +46,12 @@ def constant_interpolator(y) :
         interpolator(lambda x : y)
 #end constant_interpolator
 
+def ensure_interpolator(f) :
+    "ensures f is an interpolator, by creating a constant interpolator returning f if not."
+    return \
+        f if is_interpolator(f) else constant_interpolator(f)
+#end ensure_interpolator
+
 def linear_interpolator(from_x, to_x, from_y, to_y) :
     "returns a function of x in the range [from_x .. to_x] which returns" \
     " the corresponding linearly-interpolated value in the range [from_y .. to_y]."
@@ -79,7 +85,7 @@ def piecewise_interpolator(x_vals, interps) :
 
 #begin piecewise_interpolator
     assert len(x_vals) >= 2 and len(interps) + 1 == len(x_vals)
-    interps = tuple(f if is_interpolator(f) else constant_interpolator(f) for f in interps)
+    interps = tuple(ensure_interpolator(f) for f in interps)
     return \
         interpolate
 #end piecewise_interpolator
@@ -111,7 +117,7 @@ def tuple_interpolator(*interps) :
     #end if
     interps = tuple \
       (
-        interp if is_interpolator(interp) else constant_interpolator(interp)
+        ensure_interpolator(interp)
         for interp in interps
       )
     return \
@@ -162,34 +168,25 @@ def hsv_to_rgb_interpolator(h, s, v) :
     " converts the interpolated values to an (r, g, b) tuple. Handy for Cairo functions" \
     " that only take r, g, b colours, because animating in HSV space usually gives more" \
     " useful effects."
+    h = ensure_interpolator(h)
+    s = ensure_interpolator(s)
+    v = ensure_interpolator(v)
     return interpolator \
       (
-        lambda x :
-            colorsys.hsv_to_rgb
-              (
-                h = h(x) if is_interpolator(h) else h,
-                s = s(x) if is_interpolator(s) else s,
-                v = v(x) if is_interpolator(v) else v
-              )
+        lambda x : colorsys.hsv_to_rgb(h(x), s(x), v(x))
       )
 #end hsv_to_rgb_interpolator
 
 def hsva_to_rgba_interpolator(h, s, v, a) :
     "given h, s, v, a interpolators or constant values, returns an interpolator that" \
     " converts the interpolated values to an (r, g, b, a) tuple."
+    h = ensure_interpolator(h)
+    s = ensure_interpolator(s)
+    v = ensure_interpolator(v)
+    a = ensure_interpolator(a)
     return interpolator \
       (
-        lambda x :
-                colorsys.hsv_to_rgb
-                  (
-                    h = h(x) if is_interpolator(h) else h,
-                    s = s(x) if is_interpolator(s) else s,
-                    v = v(x) if is_interpolator(v) else v
-                  )
-            +
-                (
-                    a(x) if is_interpolator(a) else a,
-                )
+        lambda x : colorsys.hsv_to_rgb(h(x), s(x), v(x)) + (a(x),)
       )
 #end hsv_to_rgb_interpolator
 
@@ -217,7 +214,7 @@ def make_draw(*draw_settings) :
             else : # assume tuple
                 args = tuple \
                   (
-                    arg(x) if is_interpolator(arg) else arg
+                    ensure_interpolator(arg)(x)
                     for arg in interp
                   )
             #end if
