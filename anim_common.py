@@ -109,20 +109,21 @@ def piecewise_linear_interpolator(x_vals, y_vals) :
           )
 #end piecewise_linear_interpolator
 
-def tuple_interpolator(*interps) :
-    "given a tuple of interpolators or constant values, returns a function of x which will" \
-    " yield the corresponding tuple of interpolated y-values for a given x."
-    if len(interps) == 1 and type(interps[0]) == tuple :
-        interps = interps[0]
+def func_interpolator(func, *args) :
+    "given a function of n args, and n interpolators or constant values, returns an" \
+    " interpolator which will return the function of those (interpolated) values at" \
+    " the specified time."
+    if len(args) == 1 and type(args[0]) == tuple :
+        args = args[0]
     #end if
-    interps = tuple \
+    args = tuple \
       (
-        ensure_interpolator(interp)
-        for interp in interps
+        ensure_interpolator(arg)
+        for arg in args
       )
     return \
-        interpolator(lambda x : tuple(interp(x) for interp in interps))
-#end tuple_interpolator
+        interpolator(lambda x : func(*tuple(arg(x) for arg in args)))
+#end func_interpolator
 
 def periodic_interpolator(from_x, to_x, interp, offset = 0) :
     "given an existing interpolator defined over the domain [from_x, to_x], returns" \
