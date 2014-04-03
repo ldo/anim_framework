@@ -231,25 +231,25 @@ def make_draw(*draw_settings) :
         apply_settings
 #end make_draw
 
-def draw_sequence(*draw_procs) :
+def draw_compose(*draw_procs) :
     "given a sequence of draw procedures, returns a draw procedure that invokes" \
-    " them in turn. The Cairo context is saved/restored around each one."
+    " them one on top of the other. The Cairo context is saved/restored around each one."
 
-    def apply_sequence(g, x) :
+    def apply_compose(g, x) :
         for proc in draw_procs :
             g.save()
             proc(g, x)
             g.restore()
         #end for
-    #end apply_sequence
+    #end apply_compose
 
-#begin draw_sequence
+#begin draw_compose
     if len(draw_procs) == 1 and type(draw_procs[0]) == tuple :
         draw_procs = draw_procs[0]
     #end if
     return \
-        apply_sequence
-#end draw_sequence
+        apply_compose
+#end draw_compose
 
 #+
 # Higher-level useful stuff
