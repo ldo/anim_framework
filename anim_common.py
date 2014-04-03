@@ -196,7 +196,7 @@ def hsva_to_rgba_interpolator(h, s, v, a) :
 #-
 
 def null_draw(g, x) :
-    "a draw function which does nothing."
+    "a draw procedure which does nothing."
     pass
 #end null_draw
 
@@ -250,6 +250,45 @@ def draw_compose(*draw_procs) :
     return \
         apply_compose
 #end draw_compose
+
+def draw_sequence(x_vals, draws) :
+    "given a sequence of x values x_vals, and a sequence of draw procedures draws" \
+    " such that len(draws) = len(x_vals) + 1, returns a draw procedure which will" \
+    " invoke draws[0] during the time before x_vals[0], draws[-1] during the time" \
+    " after x_vals[-1], and in-between elements of draws during the corresponding" \
+    " intervals between consecutive elements of x_vals. You can use null_draw if you" \
+    " don’t want drawing to happen during a particular range of times."
+
+    def select_from_sequence(g, x) :
+        i = len(x_vals)
+        while True :
+            if i == 0 :
+                draw = draws[0]
+                break
+            #end if
+            if x >= x_vals[i - 1] :
+                draw = draws[i]
+                break
+            #end if
+            i -= 1
+        #end while
+        draw(g, x)
+    #end select_from_sequence
+
+#begin draw_sequence
+    assert len(draws) != 0 and len(x_vals) + 1 == len(draws)
+    return \
+        select_from_sequence
+#end draw_sequence
+
+def retime_draw(draw, interp) :
+    "returns a draw procedure which invokes draw with the time transformed through interp."
+    def apply_draw(g, x) :
+        draw(g, interp(x))
+    #end apply_draw
+    return \
+        apply_draw
+#end retime_draw
 
 #+
 # Higher-level useful stuff
