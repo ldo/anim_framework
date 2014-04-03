@@ -6,33 +6,30 @@
 #-
 
 import math
-from fractions import \
-    Fraction
 import anim_common
 
-def draw(g, radius, amplitude, freq_numer, freq_denom, phase, nr_steps) :
-    ratio = Fraction(freq_numer, freq_denom)
-    nr_cycles = ratio.denominator # to produce one complete traversal of curve
+def draw(g, radius, amplitude, freq, phase, nr_steps) :
+    # note freq must be a Fraction
 
     def curve_func(x) :
-        phi = 2 * math.pi * x * nr_cycles * freq_denom
-        theta = 2 * math.pi * (x + phase) * nr_cycles * freq_numer
+        # Note that the curve can still be traced twice in some situations, e.g.
+        # try a frequency of 3/5 and a radius of 0. But if the radius is set to nonzero,
+        # the two halves no longer overlap.
+        phi = 2 * math.pi * x * freq.denominator
+        theta = 2 * math.pi * (x + phase) * freq.numerator
         r = radius + math.sin(theta) * amplitude
         return \
-            (
-                r * math.cos(phi),
-                r * math.sin(phi)
-            )
+            (r * math.cos(phi), r * math.sin(phi))
     #end curve_func
 
     anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps)
 #end draw
 
-def make_draw(radius, amplitude, freq_numer, freq_denom, phase, nr_steps, do_settings = None) :
+def make_draw(radius, amplitude, freq, phase, nr_steps, do_settings = None) :
+    # note freq must be a Fraction
     radius = anim_common.ensure_interpolator(radius)
     amplitude = anim_common.ensure_interpolator(amplitude)
-    freq_numer = anim_common.ensure_interpolator(freq_numer)
-    freq_denom = anim_common.ensure_interpolator(freq_denom)
+    freq = anim_common.ensure_interpolator(freq)
     phase = anim_common.ensure_interpolator(phase)
     nr_steps = anim_common.ensure_interpolator(nr_steps)
 
@@ -40,14 +37,13 @@ def make_draw(radius, amplitude, freq_numer, freq_denom, phase, nr_steps, do_set
         if do_settings != None :
             do_settings(g, x)
         #end if
-        # note freq_numer, freq_denom and nr_steps must be integers
+        # note nr_steps must be integer
         draw \
           (
             g = g,
             radius = radius(x),
             amplitude = amplitude(x),
-            freq_numer = round(freq_numer(x)),
-            freq_denom = round(freq_denom(x)),
+            freq = freq(x),
             phase = phase(x),
             nr_steps = round(nr_steps(x))
           )
