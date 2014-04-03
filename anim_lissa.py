@@ -12,14 +12,15 @@ import anim_common
 
 def draw(g, x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps) :
 
-    ratio = Fraction(abs(x_freq), abs(y_freq))
-    nr_cycles = min(ratio.numerator, ratio.denominator) # to produce one complete traversal of curve
+    # reduce relative frequencies to lowest terms
+    ratio = Fraction(x_freq, y_freq)
+    x_freq, y_freq = ratio.numerator, ratio.denominator
 
     def curve_func(x) :
         return \
             (
-                math.sin((x + x_phase) * 2 * math.pi * nr_cycles * x_freq) * x_amp,
-                math.sin((x + y_phase) * 2 * math.pi * nr_cycles * y_freq) * y_amp,
+                math.sin((x + x_phase) * 2 * math.pi * x_freq) * x_amp,
+                math.sin((x + y_phase) * 2 * math.pi * y_freq) * y_amp,
             )
     #end curve_func
 
