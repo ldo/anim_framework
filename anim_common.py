@@ -232,15 +232,34 @@ def make_draw(*draw_settings) :
         apply_settings
 #end make_draw
 
-def draw_compose(*draw_procs) :
+def draw_overlay(*draw_procs) :
     "given a sequence of draw procedures, returns a draw procedure that invokes" \
     " them one on top of the other. The Cairo context is saved/restored around each one."
 
-    def apply_compose(g, x) :
+    def apply_overlay(g, x) :
         for proc in draw_procs :
             g.save()
             proc(g, x)
             g.restore()
+        #end for
+    #end apply_overlay
+
+#begin draw_overlay
+    if len(draw_procs) == 1 and type(draw_procs[0]) == tuple :
+        draw_procs = draw_procs[0]
+    #end if
+    return \
+        apply_overlay
+#end draw_overlay
+
+def draw_compose(*draw_procs) :
+    "given a sequence of draw procedures, returns a draw procedure that invokes" \
+    " them one after the other. Unlike draw_overlay, the Cairo context is NOT" \
+    " saved/restored around each one."
+
+    def apply_compose(g, x) :
+        for proc in draw_procs :
+            proc(g, x)
         #end for
     #end apply_compose
 
@@ -251,25 +270,6 @@ def draw_compose(*draw_procs) :
     return \
         apply_compose
 #end draw_compose
-
-def draw_combine(*draw_procs) :
-    "given a sequence of draw procedures, returns a draw procedure that invokes" \
-    " them one after the other. Unlike draw_compose, the Cairo context is NOT" \
-    " saved/restored around each one."
-
-    def apply_combine(g, x) :
-        for proc in draw_procs :
-            proc(g, x)
-        #end for
-    #end apply_combine
-
-#begin draw_combine
-    if len(draw_procs) == 1 and type(draw_procs[0]) == tuple :
-        draw_procs = draw_procs[0]
-    #end if
-    return \
-        apply_combine
-#end draw_combine
 
 def draw_sequence(x_vals, draws) :
     "given a sequence of x values x_vals, and a sequence of draw procedures draws" \
