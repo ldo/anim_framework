@@ -252,6 +252,25 @@ def draw_compose(*draw_procs) :
         apply_compose
 #end draw_compose
 
+def draw_combine(*draw_procs) :
+    "given a sequence of draw procedures, returns a draw procedure that invokes" \
+    " them one after the other. Unlike draw_compose, the Cairo context is NOT" \
+    " saved/restored around each one."
+
+    def apply_combine(g, x) :
+        for proc in draw_procs :
+            proc(g, x)
+        #end for
+    #end apply_combine
+
+#begin draw_combine
+    if len(draw_procs) == 1 and type(draw_procs[0]) == tuple :
+        draw_procs = draw_procs[0]
+    #end if
+    return \
+        apply_combine
+#end draw_combine
+
 def draw_sequence(x_vals, draws) :
     "given a sequence of x values x_vals, and a sequence of draw procedures draws" \
     " such that len(draws) = len(x_vals) + 1, returns a draw procedure which will" \

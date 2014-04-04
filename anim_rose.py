@@ -26,7 +26,7 @@ def draw(g, amplitude, freq, offset, phase, nr_steps) :
     anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps)
 #end draw
 
-def make_draw(amplitude, freq, offset, phase, nr_steps, do_settings = None) :
+def make_draw(amplitude, freq, offset, phase, nr_steps) :
     # note freq must be a Fraction
     offset = anim_common.ensure_interpolator(offset)
     amplitude = anim_common.ensure_interpolator(amplitude)
@@ -35,9 +35,6 @@ def make_draw(amplitude, freq, offset, phase, nr_steps, do_settings = None) :
     nr_steps = anim_common.ensure_interpolator(nr_steps)
 
     def apply_draw(g, x) :
-        if do_settings != None :
-            do_settings(g, x)
-        #end if
         # note nr_steps must be integer
         draw \
           (

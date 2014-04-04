@@ -34,7 +34,7 @@ def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
     anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps)
 #end draw
 
-def make_draw(ring_radius, wheel_radius, wheel_frac, phase, nr_steps, do_settings = None) :
+def make_draw(ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
     "returns a draw procedure which will draw a trochoid curve with the specified animatable" \
     " parameters."
     ring_radius = anim_common.ensure_interpolator(ring_radius)
@@ -46,9 +46,6 @@ def make_draw(ring_radius, wheel_radius, wheel_frac, phase, nr_steps, do_setting
     def apply_draw(g, x) :
         "draws a trochoid into the Cairo context g with the animated settings" \
         " appropriate to time x."
-        if do_settings != None :
-            do_settings(g, x)
-        #end if
         # note ring_radius, wheel_radius and nr_steps must be integers
         draw \
           (

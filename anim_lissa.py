@@ -28,12 +28,9 @@ def draw(g, x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps) :
     anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps)
 #end draw
 
-def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, do_settings = None) :
+def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps) :
 
     def apply_draw(g, x) :
-        if do_settings != None :
-            do_settings(g, x)
-        #end if
         # note x_freq, y_freq and nr_steps must be integers
         draw \
           (
