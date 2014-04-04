@@ -225,7 +225,17 @@ def make_draw(*draw_settings) :
     #end apply_settings
 
 #begin make_draw
-    if len(draw_settings) == 1 and type(draw_settings[0]) == tuple :
+    if (
+            len(draw_settings) == 1
+        and
+            type(draw_settings[0]) == tuple
+        and
+                (
+                    len(draw_settings[0]) != 2
+                or
+                    len(draw_settings[0]) == 2 and type(draw_settings[0][0]) != str
+                )
+    ) :
         draw_settings = draw_settings[0]
     #end if
     return \
