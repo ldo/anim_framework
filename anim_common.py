@@ -15,6 +15,7 @@
 # into which to draw the current frame, and t being the current frame time.
 #
 # Copyright 2014 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
 import os

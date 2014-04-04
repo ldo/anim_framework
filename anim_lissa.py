@@ -3,6 +3,7 @@
 # For background on the maths, see <https://en.wikipedia.org/wiki/Lissajous_curve>.
 #
 # Copyright 2014 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
 from fractions import \

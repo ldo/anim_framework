@@ -3,6 +3,7 @@
 # For background on the maths, see <https://en.wikipedia.org/wiki/Rose_curve>.
 #
 # Copyright 2014 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
 import math
