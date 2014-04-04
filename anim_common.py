@@ -18,6 +18,8 @@
 # Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
+from types import \
+    FunctionType
 import os
 import math
 import colorsys
@@ -34,11 +36,9 @@ def interpolator(f) :
     return f
 #end interpolator
 
-function = type(lambda x : x)
-
 def is_interpolator(f) :
     "checks if f is an interpolator function."
-    return type(f) == function and hasattr(f, "is_interpolator") and f.is_interpolator
+    return type(f) == FunctionType and hasattr(f, "is_interpolator") and f.is_interpolator
 #end is_interpolator
 
 def constant_interpolator(y) :
