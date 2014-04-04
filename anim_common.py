@@ -60,6 +60,36 @@ def linear_interpolator(from_x, to_x, from_y, to_y) :
         interpolator(lambda x : (x - from_x) / (to_x - from_x) * (to_y - from_y) + from_y)
 #end linear_interpolator
 
+def ease_inout_interpolator(x0, x1, x2, x3, from_y, to_y) :
+    "returns a function of x in the range [x0 .. x3] which interpolates over [from_y .. to_y]." \
+    " The function is a quadratic polynomial from x0 to x1, linear over x1 to x2," \
+    " and another quadratic polynomial from x2 to x3, with smooth transitions at the joins."
+
+    ease_ratio = .5
+    y1 = (x1 - x0) / (x3 - x0) * (to_y - from_y) * ease_ratio + from_y
+    y2 = (x2 - x3) / (x0 - x3) * (from_y - to_y) * ease_ratio + to_y
+    x1p = (x2 - x1) / (y2 - y1) * (x1 - x0) + x0
+    x2p = (x1 - x2) / (y1 - y2) * (x2 - x3) + x3
+    dy1p = ((x1 - x0) / (x1p - x0)) ** 2
+    dy2p = ((x2 - x3) / (x2p - x3)) ** 2
+
+    @interpolator
+    def ease_inout(x) :
+        if x < x1 :
+            y = ((x - x0) / (x1p - x0)) ** 2 / dy1p * (y1 - from_y) + from_y
+        elif x > x2 :
+            y = ((x - x3) / (x2p - x3)) ** 2 / dy2p * (y2 - to_y) + to_y
+        else :
+            y = (x - x1) / (x2 - x1) * (y2 - y1) + y1
+        #end if
+        return \
+            y
+    #end ease_inout
+
+    return \
+        ease_inout
+#end ease_inout_interpolator
+
 def piecewise_interpolator(x_vals, interps) :
     "x_vals must be a monotonically-increasing sequence of x-values, defining" \
     " domain segments, and interps must be a tuple of interpolator functions," \
@@ -319,6 +349,13 @@ def retime_draw(draw, interp) :
     return \
         apply_draw
 #end retime_draw
+
+def transform_draw(draw, scale, offset) :
+    "returns a draw procedure which is draw operating on an x-coordinate subjected" \
+    " to the specified scale and offset."
+    return \
+        retime_draw(draw, lambda x : (x - offset) / scale)
+#end transform_draw
 
 #+
 # Higher-level useful stuff
