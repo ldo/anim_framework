@@ -66,20 +66,19 @@ def ease_inout_interpolator(x0, x1, x2, x3, from_y, to_y) :
     " and another quadratic polynomial from x2 to x3, with smooth transitions at the joins." \
     " x1 can equal x0, or x2 equal x3, to disable easing at the corresponding end."
 
-    inf = float("inf")
     ease_ratio = .5
     y1 = (x1 - x0) / (x3 - x0) * (to_y - from_y) * ease_ratio + from_y
     y2 = (x2 - x3) / (x0 - x3) * (from_y - to_y) * ease_ratio + to_y
     x1p = (x2 - x1) / (y2 - y1) * (x1 - x0) + x0
     x2p = (x1 - x2) / (y1 - y2) * (x2 - x3) + x3
-    dy1p = ((x1 - x0) / (x1p - x0)) ** 2 if x1 != x0 else inf
-    dy2p = ((x2 - x3) / (x2p - x3)) ** 2 if x2 != x3 else inf
+    dy1p = ((x1 - x0) / (x1p - x0)) ** 2 if x1 != x0 else None
+    dy2p = ((x2 - x3) / (x2p - x3)) ** 2 if x2 != x3 else None
 
     @interpolator
     def ease_inout(x) :
-        if x < x1 and dy1p != inf :
+        if x < x1 and dy1p != None :
             y = ((x - x0) / (x1p - x0)) ** 2 / dy1p * (y1 - from_y) + from_y
-        elif x > x2 and dy2p != inf :
+        elif x > x2 and dy2p != None :
             y = ((x - x3) / (x2p - x3)) ** 2 / dy2p * (y2 - to_y) + to_y
         else :
             y = (x - x1) / (x2 - x1) * (y2 - y1) + y1
