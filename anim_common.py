@@ -399,7 +399,7 @@ def render_anim \
         overall_presetup(g)
     #end if
     from_frame_nr = math.ceil(start_time * frame_rate)
-    to_frame_nr = math.floor(end_time * frame_rate) + 1
+    to_frame_nr = math.ceil(end_time * frame_rate)
     for frame_nr in range(from_frame_nr, to_frame_nr) :
         g.save()
         t = frame_nr / frame_rate
