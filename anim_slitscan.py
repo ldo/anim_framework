@@ -61,7 +61,7 @@ class Slitscan :
         self.draw = draw
         self.extent = extent
         self.steps = steps
-        self.pix = cairo.ImageSurface(cairo.FORMAT_ARGB32, steps, extent)
+        self.pix = cairo.ImageSurface(cairo.FORMAT_ARGB32, steps * 2, extent)
         self.background = background
         self.g = cairo.Context(self.pix)
         self.pat = cairo.SurfacePattern(self.pix)
@@ -95,6 +95,14 @@ class Slitscan :
             self.last_draw_time = at_time
         #end if
         angle = math.atan2(to_y - from_y, to_x - from_x)
+        # tile second copy of source image to ensure seamless wraparound
+        self.pix.flush()
+        self.g.identity_matrix()
+        self.g.reset_clip()
+        self.g.set_source(self.pat)
+        self.g.new_path()
+        self.g.rectangle(self.steps, 0, self.steps, self.extent)
+        self.g.fill()
         self.pix.flush()
         g.save()
         g.translate(from_x, from_y)
@@ -137,54 +145,17 @@ class Slitscan :
                 this_offset2 += self.steps
             #end if
             dst_x = from_x + i
-            if this_offset2 > self.steps :
-                # split src and dst rects in two at wraparound point
-                this_offset2 -= self.steps
-                src_rect = (this_offset, 0, self.steps - this_offset, self.extent)
-                src_rect_2 = (0, 0, this_offset2, self.extent)
-                dst_extent_mid = \
-                    (
-                        1
-                    /
-                        (
-                                (self.steps - base_offset)
-                            /
-                                self.steps
-                            *
-                                (1 / to_extent - 1 / from_extent)
-                        +
-                            1 / from_extent
-                        )
-                    )
-                dst_width_mid = \
-                    (
-                        dst_width
-                    *
-                        (dst_extent_mid - dst_extent)
-                    /
-                        (dst_extent2 - dst_extent)
-                    )
-                dst_rect = (dst_x, from_y - dst_extent / 2, dst_width_mid, dst_extent)
-                dst_rect_2 = (dst_x + dst_width_mid, from_y - dst_extent_mid / 2, dst_width - dst_width_mid, dst_extent_mid)
-            else :
-                src_rect = (this_offset, 0, this_offset2 - this_offset, self.extent)
-                dst_rect = (dst_x, from_y - dst_extent / 2, dst_width, dst_extent)
-                src_rect_2 = None
-            #end if
-            while True :
-                m = cairo.Matrix()
-                m.translate(src_rect[0], src_rect[1])
-                m.scale(self.extent / dst_rect[3], self.extent / dst_rect[3])
-                m.translate(- dst_rect[0], - dst_rect[1])
-                self.pat.set_matrix(m)
-                g.set_source(self.pat)
-                g.new_path()
-                g.rectangle(*dst_rect)
-                g.fill()
-                if src_rect_2 == None :
-                    break
-                src_rect, dst_rect, src_rect_2 = src_rect_2, dst_rect_2, None
-            #end while
+            src_rect = (this_offset, 0, this_offset2 - this_offset, self.extent)
+            dst_rect = (dst_x, from_y - dst_extent / 2, dst_width, dst_extent)
+            m = cairo.Matrix()
+            m.translate(src_rect[0], src_rect[1])
+            m.scale(self.extent / dst_rect[3], self.extent / dst_rect[3])
+            m.translate(- dst_rect[0], - dst_rect[1])
+            self.pat.set_matrix(m)
+            g.set_source(self.pat)
+            g.new_path()
+            g.rectangle(*dst_rect)
+            g.fill()
         #end for
         g.restore()
     #end render
