@@ -154,7 +154,7 @@ class Slitscan :
             dst_rect = (dst_x, from_y - dst_extent / 2, dst_width, dst_extent)
             m = cairo.Matrix()
             m.translate(src_rect[0], src_rect[1])
-            m.scale(self.extent / dst_rect[3], self.extent / dst_rect[3])
+            m.scale(src_rect[3] / dst_rect[3], src_rect[3] / dst_rect[3])
             m.translate(- dst_rect[0], - dst_rect[1])
             self.pat.set_matrix(m)
             g.set_source(self.pat)
