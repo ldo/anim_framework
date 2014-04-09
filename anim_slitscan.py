@@ -118,6 +118,10 @@ class Slitscan :
             dst_width = min(span - i, 1)
             dst_extent = i / span * (to_extent - from_extent) + from_extent
             dst_extent2 = (i + dst_width) / span * (to_extent - from_extent) + from_extent
+            # conversion from coords in destination image to offsets in source image
+            # uses reciprocals to simulate perspective foreshortening. Note offsets
+            # are from base_offset - 1, not base_offset, because column of pixels
+            # drawn at time t = 0 is at far right (x = steps - 1).
             this_offset = \
                 (
                     (
@@ -128,6 +132,8 @@ class Slitscan :
                             self.steps
                     +
                         base_offset
+                    -
+                        1
                     )
                 %
                     self.steps
@@ -142,6 +148,8 @@ class Slitscan :
                             self.steps
                     +
                         base_offset
+                    -
+                        1
                     )
                 %
                     self.steps
