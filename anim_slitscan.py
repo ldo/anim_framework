@@ -8,6 +8,8 @@
 
 import math
 import cairo
+from anim_common import \
+    ensure_interpolator
 
 class Slitscan :
     "context for rendering a slitscan image. This is maintained as a bitmap which is" \
@@ -166,9 +168,15 @@ class Slitscan :
 #end Slitscan
 
 def make_draw(slitscan, from_x, from_y, from_extent, to_x, to_y, to_extent) :
+    from_x = ensure_interpolator(from_x)
+    from_y = ensure_interpolator(from_y)
+    from_extent = ensure_interpolator(from_extent)
+    to_x = ensure_interpolator(to_x)
+    to_y = ensure_interpolator(to_y)
+    to_extent = ensure_interpolator(to_extent)
 
     def apply_draw(g, t) :
-        slitscan.render(g, t, from_x, from_y, from_extent, to_x, to_y, to_extent)
+        slitscan.render(g, t, from_x(t), from_y(t), from_extent(t), to_x(t), to_y(t), to_extent(t))
     #end apply_draw
 
 #begin make_draw
