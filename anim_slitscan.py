@@ -67,11 +67,7 @@ class Slitscan :
         self.pix2 = cairo.ImageSurface(cairo.FORMAT_ARGB32, steps * 2, extent)
         self.background = background
         self.g = cairo.Context(self.pix)
-        self.g2 = cairo.Context(self.pix2)
-        self.pat1 = cairo.SurfacePattern(self.pix)
-        self.pat1.set_extend(cairo.EXTEND_REPEAT)
-        self.g2.set_source(self.pat1)
-        self.pat = cairo.SurfacePattern(self.pix2)
+        self.pat = cairo.SurfacePattern(self.pix)
         self.pat.set_extend(cairo.EXTEND_REPEAT)
         self.pat.set_filter(cairo.FILTER_BILINEAR)
         self.init_background()
@@ -103,12 +99,7 @@ class Slitscan :
             self.last_draw_time = at_time
         #end if
         angle = math.atan2(to_y - from_y, to_x - from_x)
-        # tile two copies of pix into pix2 to ensure seamless wraparound
         self.pix.flush()
-        self.g2.new_path()
-        self.g2.rectangle(0, 0, self.steps * 2, self.extent)
-        self.g2.fill()
-        self.pix2.flush()
         g.save()
         g.translate(from_x, from_y)
         g.rotate(angle) # orient source pattern parallel to x-axis
