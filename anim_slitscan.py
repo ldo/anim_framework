@@ -28,9 +28,12 @@ class Slitscan :
     #end time_to_offset
 
     def init_background(self) :
+        prevop = self.g.get_operator()
+        self.g.set_operator(cairo.OPERATOR_SOURCE)
         {3 : self.g.set_source_rgb, 4 : self.g.set_source_rgba}[len(self.background)] \
             (*self.background)
         self.g.paint()
+        self.g.set_operator(prevop)
     #end init_background
 
     def get_context(self, at_time) :
