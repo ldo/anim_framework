@@ -67,7 +67,6 @@ class Slitscan :
         self.extent = extent
         self.steps = steps
         self.pix = cairo.ImageSurface(cairo.FORMAT_ARGB32, steps, extent)
-        self.pix2 = cairo.ImageSurface(cairo.FORMAT_ARGB32, steps * 2, extent)
         self.background = background
         self.g = cairo.Context(self.pix)
         self.pat = cairo.SurfacePattern(self.pix)
