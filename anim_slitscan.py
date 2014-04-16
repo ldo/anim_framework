@@ -16,7 +16,8 @@ class Slitscan :
     " extent pixels tall and steps pixels wide. The draw routine takes two arguments:" \
     " a Cairo context into which to draw, and the current animation time. Drawing is" \
     " clipped to a single column of pixels corresponding to that time, transformed" \
-    " to the bounding rectangle with corners at (0, 0) and (1, extent)."
+    " to the bounding rectangle with corners at (0, 0) and (1, extent). The image will" \
+    " be animated such that a width of steps pixels occupies duration units of time."
 
 #+
 # Internal stuff
@@ -24,7 +25,7 @@ class Slitscan :
 
     def time_to_offset(self, at_time) :
         return \
-            round((1.0 - at_time) * self.steps - 1) % self.steps
+            round((1.0 - at_time / self.duration) * self.steps - 1) % self.steps
     #end time_to_offset
 
     def init_background(self) :
@@ -62,10 +63,11 @@ class Slitscan :
 # User-visible stuff
 #-
 
-    def __init__(self, draw, extent, steps, background) :
+    def __init__(self, draw, extent, steps, duration, background) :
         self.draw = draw
         self.extent = extent
         self.steps = steps
+        self.duration = duration
         self.pix = cairo.ImageSurface(cairo.FORMAT_ARGB32, steps, extent)
         self.background = background
         self.g = cairo.Context(self.pix)
@@ -85,7 +87,7 @@ class Slitscan :
         base_offset = self.time_to_offset(at_time)
         if self.last_draw_time != at_time :
             if self.last_draw_time == None :
-                self.last_draw_time = - 1 / self.steps
+                self.last_draw_time = - self.duration / self.steps
             #end if
             this_offset = self.time_to_offset(self.last_draw_time)
             time_steps = 0
@@ -95,7 +97,7 @@ class Slitscan :
                 if this_offset < 0 :
                     this_offset += self.steps
                 #end if
-                this_time = self.last_draw_time + time_steps / self.steps
+                this_time = self.last_draw_time + time_steps * self.duration / self.steps
                 self.draw(self.get_context(this_time), this_time)
             #end while
             self.last_draw_time = at_time
