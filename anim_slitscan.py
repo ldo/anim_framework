@@ -170,6 +170,57 @@ class Slitscan :
 
 #end Slitscan
 
+class SlitscanObjects(Slitscan) :
+    "draws a series of objects arranged in time and space. items is a sequence of Item," \
+    " (see the inner class definition) in the order in which they are to be drawn (which" \
+    " need not correspond to their ordering in time); extent, steps, duration and background" \
+    " have the same meanings as for the Slitscan superclass."
+
+    class Item :
+        "surface is expected to be a Cairo ImageSurface, while the other parameters specify" \
+        " its extent in space and time within the slitscan animation: width and x_offset" \
+        " are in time units, while height and y_offset are in units of the height of the" \
+        " slit."
+
+        def __init__(self, surface, width, height, x_offset, y_offset) :
+            self.surface = surface
+            self.width = width
+            self.height = height
+            self.x_offset = x_offset
+            self.y_offset = y_offset
+        #end __init__
+
+    #end Item
+
+    def draw_items(self, g, t) :
+        for item in self.items :
+            if (
+                    item.x_offset >= t and item.x_offset <= t + self.duration
+                or
+                    item.x_offset + item.width >= t and item.x_offset + item.width <= t + self.duration
+                  # either left or right edge is visible <=> some part of image is visible
+            ) :
+                g.save()
+                g.translate((item.x_offset - t) / self.duration * self.steps, item.y_offset * self.extent)
+                g.scale \
+                  (
+                    item.width / self.duration * self.steps / item.surface.get_width(),
+                    item.height * self.extent / item.surface.get_height()
+                  )
+                g.set_source_surface(item.surface)
+                g.paint()
+                g.restore()
+            #end if
+        #end for
+    #end draw_items
+
+    def __init__(self, items, extent, steps, duration, background) :
+        self.items = items
+        super().__init__(self.draw_items, extent, steps, duration, background)
+    #end __init__
+
+#end SlitscanObjects
+
 def make_draw(slitscan, from_x, from_y, from_extent, to_x, to_y, to_extent) :
     from_x = ensure_interpolator(from_x)
     from_y = ensure_interpolator(from_y)
