@@ -1,4 +1,5 @@
 #+
+# -*- coding: utf-8 -*-
 # Animations of rose curves.
 # For background on the maths, see <https://en.wikipedia.org/wiki/Rose_curve>.
 #
@@ -43,7 +44,7 @@ def make_draw(amplitude, freq, offset, phase, nr_steps) :
             amplitude = amplitude(x),
             freq = freq(x),
             phase = phase(x),
-            nr_steps = round(nr_steps(x))
+            nr_steps = int(round(nr_steps(x)))
           )
     #end apply_draw
 

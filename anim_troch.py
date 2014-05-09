@@ -1,4 +1,5 @@
 #+
+# -*- coding: utf-8 -*-
 # Animations of trochoid patterns.
 # For background on the maths, see <https://en.wikipedia.org/wiki/Spirograph>,
 # <https://en.wikipedia.org/wiki/Epitrochoid> and <https://en.wikipedia.org/wiki/Hypotrochoid>.
@@ -7,6 +8,8 @@
 # Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
+from __future__ import \
+    division
 from fractions import \
     Fraction
 from turtle import \
@@ -50,11 +53,11 @@ def make_draw(ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
         draw \
           (
             g = g,
-            ring_radius = round(ring_radius(x)),
-            wheel_radius = round(wheel_radius(x)),
+            ring_radius = int(round(ring_radius(x))),
+            wheel_radius = int(round(wheel_radius(x))),
             wheel_frac = wheel_frac(x),
             phase = phase(x),
-            nr_steps = round(nr_steps(x))
+            nr_steps = int(round(nr_steps(x)))
           )
     #end apply_draw
 

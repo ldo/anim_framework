@@ -1,4 +1,5 @@
 #+
+# -*- coding: utf-8 -*-
 # Framework for doing various animations of drawing into a Cairo
 # graphics context.
 #
@@ -18,6 +19,8 @@
 # Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
+from __future__ import \
+    division
 from types import \
     FunctionType
 import os

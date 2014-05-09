@@ -1,4 +1,5 @@
 #+
+# -*- coding: utf-8 -*-
 # Animations of Lissajous patterns.
 # For background on the maths, see <https://en.wikipedia.org/wiki/Lissajous_curve>.
 #
@@ -36,12 +37,12 @@ def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps) :
           (
             g = g,
             x_amp = x_amp(x),
-            x_freq = round(x_freq(x)),
+            x_freq = int(round(x_freq(x))),
             x_phase = x_phase(x),
             y_amp = y_amp(x),
-            y_freq = round(y_freq(x)),
+            y_freq = int(round(y_freq(x))),
             y_phase = y_phase(x),
-            nr_steps = round(nr_steps(x))
+            nr_steps = int(round(nr_steps(x)))
           )
     #end apply_draw
 

@@ -1,4 +1,4 @@
-anim_framework is a set of Python 3 classes for constructing non-real-time animations
+anim_framework is a set of Python classes for constructing non-real-time animations
 using Cairo graphics. The module anim_common contains common definitions for managing
 time and drawing, while additional modules anim_lissa, anim_rose and anim_troch build
 on this to render animations of Lissajous, rose and trochoid curves respectively.
