@@ -9,7 +9,7 @@
 import math
 import anim_common
 
-def draw(g, amplitude, freq, offset, phase, nr_steps) :
+def draw(g, amplitude, freq, offset, phase, nr_steps, start = 0, end = 0) :
     # note freq must be a Fraction
 
     def curve_func(x) :
@@ -23,7 +23,7 @@ def draw(g, amplitude, freq, offset, phase, nr_steps) :
             (r * math.cos(phi), r * math.sin(phi))
     #end curve_func
 
-    anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps)
+    anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
 #end draw
 
 def make_draw(amplitude, freq, offset, phase, nr_steps) :

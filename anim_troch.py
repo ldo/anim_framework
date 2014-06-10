@@ -13,7 +13,7 @@ from turtle import \
     Vec2D
 import anim_common
 
-def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
+def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps, start = 0, end = 0) :
     "draws a trochoid curve into the Cairo context g. ring_radius is the radius of the" \
     " stationary ring, while wheel_radius is the radius of the moving wheel; both must" \
     " be integers. frac is the fraction of the wheel radius that the actual" \
@@ -31,7 +31,7 @@ def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
         return tuple(curve_pos)
     #end curve_func
 
-    anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps)
+    anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
 #end draw
 
 def make_draw(ring_radius, wheel_radius, wheel_frac, phase, nr_steps) :
