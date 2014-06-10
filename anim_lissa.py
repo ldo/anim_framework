@@ -28,10 +28,10 @@ def draw(g, x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0,
     anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
 #end draw
 
-def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps) :
+def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0, end = 0) :
 
     def apply_draw(g, x) :
-        # note x_freq, y_freq and nr_steps must be integers
+        # note x_freq, y_freq, nr_steps, start and end must be integers
         draw \
           (
             g = g,
@@ -41,7 +41,9 @@ def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps) :
             y_amp = y_amp(x),
             y_freq = round(y_freq(x)),
             y_phase = y_phase(x),
-            nr_steps = round(nr_steps(x))
+            nr_steps = round(nr_steps(x)),
+            start = round(start(x)),
+            end = round(end(x))
           )
     #end apply_draw
 
@@ -52,7 +54,8 @@ def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps) :
     y_freq = anim_common.ensure_interpolator(y_freq)
     y_phase = anim_common.ensure_interpolator(y_phase)
     nr_steps = anim_common.ensure_interpolator(nr_steps)
+    start = anim_common.ensure_interpolator(start)
+    end = anim_common.ensure_interpolator(end)
     return \
         apply_draw
 #end make_draw
-

@@ -26,13 +26,15 @@ def draw(g, amplitude, freq, offset, phase, nr_steps, start = 0, end = 0) :
     anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
 #end draw
 
-def make_draw(amplitude, freq, offset, phase, nr_steps) :
+def make_draw(amplitude, freq, offset, phase, nr_steps, start = 0, end = 0) :
     # note freq must be a Fraction
     offset = anim_common.ensure_interpolator(offset)
     amplitude = anim_common.ensure_interpolator(amplitude)
     freq = anim_common.ensure_interpolator(freq)
     phase = anim_common.ensure_interpolator(phase)
     nr_steps = anim_common.ensure_interpolator(nr_steps)
+    start = anim_common.ensure_interpolator(start)
+    end = anim_common.ensure_interpolator(end)
 
     def apply_draw(g, x) :
         # note nr_steps must be integer
@@ -43,7 +45,9 @@ def make_draw(amplitude, freq, offset, phase, nr_steps) :
             amplitude = amplitude(x),
             freq = freq(x),
             phase = phase(x),
-            nr_steps = round(nr_steps(x))
+            nr_steps = round(nr_steps(x)),
+            start = round(start(x)),
+            end = round(end(x))
           )
     #end apply_draw
 
