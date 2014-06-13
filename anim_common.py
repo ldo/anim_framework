@@ -366,22 +366,23 @@ def draw_curve(g, f, closed, nr_steps, start = 0, end = 0) :
     "g is a Cairo context, f is a function over [0, 1) returning a tuple of" \
     " (x, y) coordinates, defining the curve to draw, and nr_steps is the" \
     " number of straight-line segments to approximate the curve. start and end" \
-    " are the start and end indexes, in [0, nr_steps] (start is inclusive, end" \
-    " is exclusive), of the actual part of the curve to draw; if omitted, they" \
-    " default to the entire curve. end can be less than start, to wrap around" \
-    " the curve. If closed, then the end and start points will be joined by" \
-    " an additional segment. The path will be stroked with the current settings" \
-    " in g."
+    " are the relative start and end fractions, in [0, 1], of the actual part" \
+    " of the curve to draw; if omitted, they  default to the entire curve. end" \
+    " can be less than start, to wrap around the curve; if both are equal, then the" \
+    " entire curve is drawn. If closed, then the end and start points will be joined" \
+    " by an additional segment. The path will be stroked with the current settings in g."
     g.new_path()
     setpos = g.move_to # for first point
     if end <= start :
-        end += nr_steps
+        end += 1
     #end if
-    for i in range(start, end) :
+    start_step = round(start * nr_steps)
+    end_step = round(end * nr_steps)
+    for i in range(start_step, end_step) :
         setpos(*f((i % nr_steps) / nr_steps))
         setpos = g.line_to # for subsequent points
     #end for
-    if closed and start % nr_steps == end % nr_steps :
+    if closed and start_step % nr_steps == end_step % nr_steps :
         g.close_path()
     #end if
     g.stroke()

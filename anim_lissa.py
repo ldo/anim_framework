@@ -31,7 +31,7 @@ def draw(g, x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0,
 def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0, end = 0) :
 
     def apply_draw(g, x) :
-        # note x_freq, y_freq, nr_steps, start and end must be integers
+        # note x_freq, y_freq and nr_steps must be integers
         draw \
           (
             g = g,
@@ -42,8 +42,8 @@ def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 
             y_freq = round(y_freq(x)),
             y_phase = y_phase(x),
             nr_steps = round(nr_steps(x)),
-            start = round(start(x)),
-            end = round(end(x))
+            start = start(x),
+            end = end(x)
           )
     #end apply_draw
 

@@ -46,8 +46,8 @@ def make_draw(amplitude, freq, offset, phase, nr_steps, start = 0, end = 0) :
             freq = freq(x),
             phase = phase(x),
             nr_steps = round(nr_steps(x)),
-            start = round(start(x)),
-            end = round(end(x))
+            start = start(x),
+            end = end(x)
           )
     #end apply_draw
 

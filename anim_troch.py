@@ -57,8 +57,8 @@ def make_draw(ring_radius, wheel_radius, wheel_frac, phase, nr_steps, start = 0,
             wheel_frac = wheel_frac(x),
             phase = phase(x),
             nr_steps = round(nr_steps(x)),
-            start = round(start(x)),
-            end = round(end(x))
+            start = start(x),
+            end = end(x)
           )
     #end apply_draw
 
