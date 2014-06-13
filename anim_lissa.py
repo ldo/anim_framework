@@ -11,7 +11,7 @@ from fractions import \
 import math
 import anim_common
 
-def draw(g, x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0, end = 0) :
+def draw(g, x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0, end = 1) :
 
     # reduce relative frequencies to lowest terms
     ratio = Fraction(x_freq, y_freq)
@@ -28,7 +28,7 @@ def draw(g, x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0,
     anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
 #end draw
 
-def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0, end = 0) :
+def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0, end = 1) :
 
     def apply_draw(g, x) :
         # note x_freq, y_freq and nr_steps must be integers
