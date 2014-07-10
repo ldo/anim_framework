@@ -154,5 +154,10 @@ Hopefully that gives you the flavour of the framework, and how easy it is to do
 some quite elaborate animations. By all means, delve further into it, try things out,
 and have fun.
 
+A couple of example animations done with this framework are available on Wikimedia
+Commons, together with the code for generating them:
+  * https://commons.wikimedia.org/wiki/File:Simple_Lissajous_Animation.ogv
+  * https://commons.wikimedia.org/wiki/File:Rose_offset_anim.ogv
+
 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>
-2014 April 7
+2014 July 10
