@@ -10,7 +10,8 @@ import math
 import qahirah as qah
 from qahirah import \
     CAIRO, \
-    Rect
+    Rect, \
+    Vector
 from anim_common import \
     ensure_interpolator
 
@@ -74,12 +75,14 @@ class Slitscan :
         self.last_draw_time = None
     #end __init__
 
-    def render(self, g, at_time, from_x, from_y, from_extent, to_x, to_y, to_extent) :
+    def render(self, g, at_time, from_pos, from_extent, to_pos, to_extent) :
         "updates the current state of the pattern and draws it into destination qahirah.Context" \
-        " g. The line from (from_x, from_y) to (to_x, to_y) defines the  starting and ending" \
+        " g. The line from Vectors from_pos to to_pos defines the  starting and ending" \
         " points of the animation trajectory, while from_extent and to_extent define the extents" \
         " of the image perpendicular to this direction at these points, the ratio of the values" \
         " defining the amount of perspective foreshortening."
+        from_pos = Vector.from_tuple(from_pos)
+        to_pos = Vector.from_tuple(to_pos)
         base_offset = self.time_to_offset(at_time)
         if self.last_draw_time != at_time :
             if self.last_draw_time == None :
@@ -98,13 +101,13 @@ class Slitscan :
             #end while
             self.last_draw_time = at_time
         #end if
-        angle = math.atan2(to_y - from_y, to_x - from_x)
+        angle = (to_pos - from_pos).angle()
         self.pix.flush()
         g.save()
-        g.translate((from_x, from_y))
+        g.translate(from_pos)
         g.rotate(angle) # orient source pattern parallel to x-axis
-        g.translate((- from_x, - from_y))
-        span = math.hypot(to_x - from_x, to_y - from_y)
+        g.translate(- from_pos)
+        span = abs(to_pos - from_pos)
         for i in range(0, math.ceil(span)) :
             dst_width = min(span - i, 1)
             dst_extent = i / span * (to_extent - from_extent) + from_extent
@@ -148,9 +151,9 @@ class Slitscan :
             if this_offset2 < this_offset :
                 this_offset2 += self.steps
             #end if
-            dst_x = from_x + i
+            dst_x = from_pos.x + i
             src_rect = Rect(this_offset, 0, this_offset2 - this_offset, self.extent)
-            dst_rect = Rect(dst_x, from_y - dst_extent / 2, dst_width, dst_extent)
+            dst_rect = Rect(dst_x, from_pos.y - dst_extent / 2, dst_width, dst_extent)
             self.pat.matrix = dst_rect.transform_to(src_rect)
             g.set_source(self.pat)
             g.new_path()
@@ -189,11 +192,16 @@ class SlitscanObjects(Slitscan) :
             if (
                     item.x_offset >= t and item.x_offset <= t + self.duration
                 or
-                    item.x_offset + item.width >= t and item.x_offset + item.width <= t + self.duration
+                        item.x_offset + item.width >= t
+                    and
+                        item.x_offset + item.width <= t + self.duration
                   # either left or right edge is visible <=> some part of image is visible
             ) :
                 g.save()
-                g.translate(((item.x_offset - t) / self.duration * self.steps, item.y_offset * self.extent))
+                g.translate \
+                  ((
+                    (item.x_offset - t) / self.duration * self.steps, item.y_offset * self.extent
+                  ))
                 g.scale \
                   ((
                     item.width / self.duration * self.steps / item.surface.width,
@@ -213,16 +221,14 @@ class SlitscanObjects(Slitscan) :
 
 #end SlitscanObjects
 
-def make_draw(slitscan, from_x, from_y, from_extent, to_x, to_y, to_extent) :
-    from_x = ensure_interpolator(from_x)
-    from_y = ensure_interpolator(from_y)
+def make_draw(slitscan, from_pos, from_extent, to_pos, to_extent) :
+    from_pos = ensure_interpolator(from_pos)
     from_extent = ensure_interpolator(from_extent)
-    to_x = ensure_interpolator(to_x)
-    to_y = ensure_interpolator(to_y)
+    to_pos = ensure_interpolator(to_pos)
     to_extent = ensure_interpolator(to_extent)
 
     def apply_draw(g, t) :
-        slitscan.render(g, t, from_x(t), from_y(t), from_extent(t), to_x(t), to_y(t), to_extent(t))
+        slitscan.render(g, t, from_pos(t), from_extent(t), to_pos(t), to_extent(t))
     #end apply_draw
 
 #begin make_draw
