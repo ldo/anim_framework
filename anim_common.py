@@ -217,6 +217,34 @@ def transform_interpolator(interp, scale, offset) :
         interpolator(lambda x : interp((x - offset) / scale))
 #end transform_interpolator
 
+def matrix_interpolator(*args) :
+    "the argument(s) must be a sequence of interpolators returning qahirah.Matrix" \
+    " values. The result will be an interpolator that concatenates the matrices that" \
+    " they return in sequence at the specified animation time."
+
+    @interpolator
+    def concat_matrices(x) :
+        result = qah.Matrix.identity()
+        for f in args :
+            result *= f(x)
+        #end for
+        return \
+            result
+    #end concat_matrices
+
+#begin matrix_interpolator
+    if len(args) == 1 and type(args[0]) == tuple :
+        args = args[0]
+    #end if
+    args = tuple \
+      (
+        ensure_interpolator(arg)
+        for arg in args
+      )
+    return \
+        concat_matrices
+#end matrix_interpolator
+
 def hsva_to_colour_interpolator(h, s, v, a) :
     "given h, s, v, a interpolators or constant values, returns an interpolator that" \
     " converts the interpolated values to a qahirah.Colour. Handy because animating" \
