@@ -2,19 +2,22 @@
 # Framework for generating slit-scan animations.
 # For some background, see <https://en.wikipedia.org/wiki/Slitscan>.
 #
-# Copyright 2014 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Copyright 2014, 2015 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 # Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
 import math
-import cairo
+import qahirah as qah
+from qahirah import \
+    CAIRO, \
+    Rect
 from anim_common import \
     ensure_interpolator
 
 class Slitscan :
     "context for rendering a slitscan image. This is maintained as a bitmap which is" \
     " extent pixels tall and steps pixels wide. The draw routine takes two arguments:" \
-    " a Cairo context into which to draw, and the current animation time. Drawing is" \
+    " a qahirah.Context into which to draw, and the current animation time. Drawing is" \
     " clipped to a single column of pixels corresponding to that time, transformed" \
     " to the bounding rectangle with corners at (0, 0) and (1, extent). The image will" \
     " be animated such that a width of steps pixels occupies duration units of time."
@@ -29,10 +32,9 @@ class Slitscan :
     #end time_to_offset
 
     def init_background(self) :
-        prevop = self.g.get_operator()
-        self.g.set_operator(cairo.OPERATOR_SOURCE)
-        {3 : self.g.set_source_rgb, 4 : self.g.set_source_rgba}[len(self.background)] \
-            (*self.background)
+        prevop = self.g.operator
+        self.g.set_operator(CAIRO.OPERATOR_SOURCE)
+        self.g.set_source_colour(self.background)
         self.g.paint()
         self.g.set_operator(prevop)
     #end init_background
@@ -44,14 +46,8 @@ class Slitscan :
         self.g.identity_matrix()
         self.g.reset_clip()
         self.g.new_path()
-        self.g.translate(self.time_to_offset(at_time), 0)
-        self.g.rectangle \
-          (
-            0, # x
-            0, # y
-            1, # width
-            self.extent # height
-          )
+        self.g.translate((self.time_to_offset(at_time), 0))
+        self.g.rectangle(Rect(0, 0, 1, self.extent))
         self.g.clip()
         self.g.new_path()
         self.init_background()
@@ -68,18 +64,18 @@ class Slitscan :
         self.extent = extent
         self.steps = steps
         self.duration = duration
-        self.pix = cairo.ImageSurface(cairo.FORMAT_ARGB32, steps, extent)
+        self.pix = qah.ImageSurface.create(CAIRO.FORMAT_ARGB32, (steps, extent))
         self.background = background
-        self.g = cairo.Context(self.pix)
-        self.pat = cairo.SurfacePattern(self.pix)
-        self.pat.set_extend(cairo.EXTEND_REPEAT)
-        self.pat.set_filter(cairo.FILTER_BILINEAR)
+        self.g = qah.Context.create(self.pix)
+        self.pat = qah.Pattern.create_for_surface(self.pix)
+        self.pat.set_extend(CAIRO.EXTEND_REPEAT)
+        self.pat.set_filter(CAIRO.FILTER_BILINEAR)
         self.init_background()
         self.last_draw_time = None
     #end __init__
 
     def render(self, g, at_time, from_x, from_y, from_extent, to_x, to_y, to_extent) :
-        "updates the current state of the pattern and draws it into destination Cairo context" \
+        "updates the current state of the pattern and draws it into destination qahirah.Context" \
         " g. The line from (from_x, from_y) to (to_x, to_y) defines the  starting and ending" \
         " points of the animation trajectory, while from_extent and to_extent define the extents" \
         " of the image perpendicular to this direction at these points, the ratio of the values" \
@@ -105,9 +101,9 @@ class Slitscan :
         angle = math.atan2(to_y - from_y, to_x - from_x)
         self.pix.flush()
         g.save()
-        g.translate(from_x, from_y)
+        g.translate((from_x, from_y))
         g.rotate(angle) # orient source pattern parallel to x-axis
-        g.translate(- from_x, - from_y)
+        g.translate((- from_x, - from_y))
         span = math.hypot(to_x - from_x, to_y - from_y)
         for i in range(0, math.ceil(span)) :
             dst_width = min(span - i, 1)
@@ -153,16 +149,12 @@ class Slitscan :
                 this_offset2 += self.steps
             #end if
             dst_x = from_x + i
-            src_rect = (this_offset, 0, this_offset2 - this_offset, self.extent)
-            dst_rect = (dst_x, from_y - dst_extent / 2, dst_width, dst_extent)
-            m = cairo.Matrix()
-            m.translate(src_rect[0], src_rect[1])
-            m.scale(src_rect[3] / dst_rect[3], src_rect[3] / dst_rect[3])
-            m.translate(- dst_rect[0], - dst_rect[1])
-            self.pat.set_matrix(m)
+            src_rect = Rect(this_offset, 0, this_offset2 - this_offset, self.extent)
+            dst_rect = Rect(dst_x, from_y - dst_extent / 2, dst_width, dst_extent)
+            self.pat.matrix = dst_rect.transform_to(src_rect)
             g.set_source(self.pat)
             g.new_path()
-            g.rectangle(*dst_rect)
+            g.rectangle(dst_rect)
             g.fill()
         #end for
         g.restore()
@@ -177,7 +169,7 @@ class SlitscanObjects(Slitscan) :
     " have the same meanings as for the Slitscan superclass."
 
     class Item :
-        "surface is expected to be a Cairo ImageSurface, while the other parameters specify" \
+        "surface is expected to be a qahirah.ImageSurface, while the other parameters specify" \
         " its extent in space and time within the slitscan animation: width and x_offset" \
         " are in time units, while height and y_offset are in units of the height of the" \
         " slit."
@@ -201,12 +193,12 @@ class SlitscanObjects(Slitscan) :
                   # either left or right edge is visible <=> some part of image is visible
             ) :
                 g.save()
-                g.translate((item.x_offset - t) / self.duration * self.steps, item.y_offset * self.extent)
+                g.translate(((item.x_offset - t) / self.duration * self.steps, item.y_offset * self.extent))
                 g.scale \
-                  (
-                    item.width / self.duration * self.steps / item.surface.get_width(),
-                    item.height * self.extent / item.surface.get_height()
-                  )
+                  ((
+                    item.width / self.duration * self.steps / item.surface.width,
+                    item.height * self.extent / item.surface.height
+                  ))
                 g.set_source_surface(item.surface)
                 g.paint()
                 g.restore()

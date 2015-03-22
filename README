@@ -1,7 +1,8 @@
 anim_framework is a set of Python 3 classes for constructing non-real-time animations
-using Cairo graphics. The module anim_common contains common definitions for managing
-time and drawing, while additional modules anim_lissa, anim_rose and anim_troch build
-on this to render animations of Lissajous, rose and trochoid curves respectively.
+using Cairo graphics via the Qahirah wrapper <https://github.com/ldo/qahirah>. The
+module anim_common contains common definitions for managing time and drawing, while
+additional modules anim_lissa, anim_rose and anim_troch build on this to render
+animations of Lissajous, rose and trochoid curves respectively.
 
 anim_common provides a convenience routine, render_anim, which will render out an
 entire animation to a sequence of numbered PNG frames. These can then be re-encoded through
@@ -13,8 +14,7 @@ of the animation in seconds, the width and height of each frame, the frame rate,
 number of linear steps used to approximate curves:
 
     anim_duration = 10.0
-    width = 1280
-    height = 720
+    dimensions = qahirah.Vector(1280, 720)
     frame_rate = 25.0
     nr_steps = 500
 
@@ -49,17 +49,17 @@ you can define your own.
 And finally we can render the curve out to actual images:
 
     def anim_init(g) :
-        g.translate(width / 2, height / 2)
-        g.set_source_rgb(1, 1, 1)
+        g.translate(dimensions / 2)
+        g.set_source_colour(qahirah.Colour.grey(1))
         g.paint()
-        g.set_source_rgb(*colorsys.hsv_to_rgb(0.25, 0.9, 0.9))
+        g.set_source_colour(qahirah.Colour.from_hsva((0.25, 0.9, 0.9)))
         g.set_line_width(4)
     #end anim_init
 
     anim_common.render_anim \
       (
-        width = width,
-        height = height,
+        width = dimensions.x,
+        height = dimensions.y,
         start_time = 0.0,
         end_time = anim_duration,
         frame_rate = frame_rate,
@@ -85,7 +85,7 @@ Cairo drawing context but before rendering any frames, in order to do any specia
 that you need. Here it sets the drawing origin to the centre of the frame (for positioning
 the curve), clears the background to white, and sets a pen colour and size for the curve.
 HSV tends to be a more convenient space for experimenting with colours than RGB, which is
-why I use the hsv_to_rgb conversion provided by the standard Python library.
+why I prefer to specify colours in that space.
 
 If you try playing back the resulting animation from the above, it won’t look right.
 What happens is that the Lissajous curves from previous frames remain on succeeding
@@ -96,9 +96,9 @@ What you want is to start with a white background for each frame. This can be do
 with a custom draw procedure as simple as
 
     def init_frame(g, t) :
-        g.set_source_rgb(1, 1, 1) # background colour
+        g.set_source_colour(qahirah.Colour.grey(1)) # background colour
         g.paint()
-        g.set_source_rgb(*colorsys.hsv_to_rgb(0.25, 0.9, 0.9)) # curve colour
+        g.set_source_colour(qahirah.Colour.from_hsva((0.25, 0.9, 0.9))) # curve colour
     #end init_frame
 
 (Note to be a draw procedure it has to take two arguments, even though it pays no attention
@@ -108,8 +108,8 @@ a draw procedure which invokes its first argument followed by its second argumen
 
     anim_common.render_anim \
       (
-        width = width,
-        height = height,
+        width = dimensions.x,
+        height = dimensions.y,
         start_time = 0.0,
         end_time = anim_duration,
         frame_rate = frame_rate,
@@ -126,7 +126,7 @@ playing back the new frames, you should now see a nicely-animating clean Lissajo
 Now, supposing we want to animate the colour of the curve. The draw procedure returned
 by anim_lissa.make_draw doesn’t have any option for adjusting Cairo settings like the
 pen size, colour etc; it simply uses whatever settings are currently in effect. To
-control these settings in an animated fashion, we can add a suitable set_source_rgb
+control these settings in an animated fashion, we can add a suitable set_source_colour
 call to our init_frame procedure, and animate it based on the second argument (which we
 were ignoring before). But since init_frame consists of nothing but Cairo calls, there
 is a convenience routine to make it easier to define the whole procedure, complete
@@ -134,16 +134,19 @@ with animation:
 
     init_frame = anim_common.make_draw \
       (
-        ("set_source_rgb", (1, 1, 1)),
+        ("set_source_colour", (Colour.grey(1),)),
         ("paint", ()),
         (
-            "set_source_rgb",
-            anim_common.hsv_to_rgb_interpolator
-              (
-                h = anim_common.linear_interpolator(0, anim_duration, 0, 1),
-                s = 0.9,
-                v = 0.9,
-              )
+            "set_source_colour",
+            (
+                anim_common.hsva_to_colour_interpolator
+                  (
+                    h = anim_common.linear_interpolator(0, anim_duration, 0, 1),
+                    s = 0.9,
+                    v = 0.9,
+                    a = 1.0
+                  ),
+            )
         ),
       )
 
@@ -160,4 +163,4 @@ Commons, together with the code for generating them:
   * https://commons.wikimedia.org/wiki/File:Rose_offset_anim.ogv
 
 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>
-2014 July 10
+2015 March 22

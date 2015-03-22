@@ -11,10 +11,10 @@
 # of interpolators and constant values into the animation framework, and
 # it can automatically tell which values are animated and which are not.
 #
-# A draw procedure takes two arguments (g, t), g being a Cairo context
+# A draw procedure takes two arguments (g, t), g being a qahirah.Context
 # into which to draw the current frame, and t being the current frame time.
 #
-# Copyright 2014 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Copyright 2014, 2015 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 # Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
@@ -22,8 +22,7 @@ from types import \
     FunctionType
 import os
 import math
-import colorsys
-import cairo
+import qahirah as qah
 
 #+
 # Interpolators
@@ -196,32 +195,33 @@ def transform_interpolator(interp, scale, offset) :
         interpolator(lambda x : interp((x - offset) / scale))
 #end transform_interpolator
 
-def hsv_to_rgb_interpolator(h, s, v) :
-    "given h, s, v interpolators or constant values, returns an interpolator that" \
-    " converts the interpolated values to an (r, g, b) tuple. Handy for Cairo functions" \
-    " that only take r, g, b colours, because animating in HSV space usually gives more" \
-    " useful effects."
-    h = ensure_interpolator(h)
-    s = ensure_interpolator(s)
-    v = ensure_interpolator(v)
-    return interpolator \
-      (
-        lambda x : colorsys.hsv_to_rgb(h(x), s(x), v(x))
-      )
-#end hsv_to_rgb_interpolator
-
-def hsva_to_rgba_interpolator(h, s, v, a) :
+def hsva_to_colour_interpolator(h, s, v, a) :
     "given h, s, v, a interpolators or constant values, returns an interpolator that" \
-    " converts the interpolated values to an (r, g, b, a) tuple."
+    " converts the interpolated values to a qahirah.Colour. Handy because animating" \
+    " in HSV space rather than RGB usually gives more useful effects."
     h = ensure_interpolator(h)
     s = ensure_interpolator(s)
     v = ensure_interpolator(v)
     a = ensure_interpolator(a)
     return interpolator \
       (
-        lambda x : colorsys.hsv_to_rgb(h(x), s(x), v(x)) + (a(x),)
+        lambda x : qah.Colour.from_hsva((h(x), s(x), v(x), a(x)))
       )
-#end hsv_to_rgb_interpolator
+#end hsva_to_colour_interpolator
+
+def hlsa_to_colour_interpolator(h, l, s, a) :
+    "given h, l, s, a interpolators or constant values, returns an interpolator that" \
+    " converts the interpolated values to a qahirah.Colour. Handy because animating" \
+    " in HLS space rather than RGB usually gives more useful effects."
+    h = ensure_interpolator(h)
+    l = ensure_interpolator(l)
+    s = ensure_interpolator(s)
+    a = ensure_interpolator(a)
+    return interpolator \
+      (
+        lambda x : qah.Colour.from_hlsa((h(x), l(x), s(x), a(x)))
+      )
+#end hlsa_to_colour_interpolator
 
 #+
 # Draw procedures
@@ -234,7 +234,7 @@ def null_draw(g, x) :
 
 def make_draw(*draw_settings) :
     "draw_settings must be a tuple of 2-tuples; in each 2-tuple, the first element is" \
-    " a Cairo context method name, and the second element is a tuple of arguments to that" \
+    " a qahirah.Context method name, and the second element is a tuple of arguments to that" \
     " method, or an interpolator function returning such a tuple. If the second element is" \
     " a tuple, then each element is either a corresponding argument value, or an interpolator" \
     " that evaluates to such an argument value. This function returns a draw procedure" \
@@ -363,7 +363,7 @@ def transform_draw(draw, scale, offset) :
 #-
 
 def draw_curve(g, f, closed, nr_steps, start = 0, end = 1) :
-    "g is a Cairo context, f is a function over [0, 1) returning a tuple of" \
+    "g is a qahirah.Context, f is a function over [0, 1) returning a tuple of" \
     " (x, y) coordinates, defining the curve to draw, and nr_steps is the" \
     " number of straight-line segments to approximate the curve. start and end" \
     " are the relative start and end fractions, in [0, 1], of the actual part" \
@@ -379,7 +379,7 @@ def draw_curve(g, f, closed, nr_steps, start = 0, end = 1) :
     start_step = round(start * nr_steps)
     end_step = round(end * nr_steps)
     for i in range(start_step, end_step) :
-        setpos(*f((i % nr_steps) / nr_steps))
+        setpos(f((i % nr_steps) / nr_steps))
         setpos = g.line_to # for subsequent points
     #end for
     if closed and start_step % nr_steps == end_step % nr_steps :
@@ -396,13 +396,13 @@ def render_anim \
     end_time,
     frame_rate,
     draw_frame, # draw procedure
-    overall_presetup, # called to do once-off setup of Cairo context
+    overall_presetup, # called to do once-off setup of qahirah Context
     out_dir, # where to write numbered PNG frames
     start_frame_nr # frame number corresponding to time 0
   ) :
     "renders out an animation to a sequence of PNG image files."
-    pix = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
-    g = cairo.Context(pix)
+    pix = qah.ImageSurface.create(qah.CAIRO.FORMAT_ARGB32, (width, height))
+    g = qah.Context.create(pix)
     if overall_presetup != None :
         overall_presetup(g)
     #end if

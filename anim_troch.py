@@ -14,7 +14,7 @@ from turtle import \
 import anim_common
 
 def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps, start = 0, end = 1) :
-    "draws a trochoid curve into the Cairo context g. ring_radius is the radius of the" \
+    "draws a trochoid curve into the qahirah.Context g. ring_radius is the radius of the" \
     " stationary ring, while wheel_radius is the radius of the moving wheel; both must" \
     " be integers. frac is the fraction of the wheel radius that the actual" \
     " point on the curve is located from the centre of the wheel. nr_steps is the" \
@@ -46,7 +46,7 @@ def make_draw(ring_radius, wheel_radius, wheel_frac, phase, nr_steps, start = 0,
     end = anim_common.ensure_interpolator(end)
 
     def apply_draw(g, x) :
-        "draws a trochoid into the Cairo context g with the animated settings" \
+        "draws a trochoid into the qahirah.Context g with the animated settings" \
         " appropriate to time x."
         # note ring_radius, wheel_radius and nr_steps must be integers
         draw \
