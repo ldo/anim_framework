@@ -372,15 +372,13 @@ def draw_curve(g, f, closed, nr_steps, start = 0, end = 1) :
     " and start points will be joined by an additional segment. The path will be" \
     " stroked with the current settings in g."
     g.new_path()
-    setpos = g.move_to # for first point
     if end < start :
         end += 1
     #end if
     start_step = round(start * nr_steps)
     end_step = round(end * nr_steps)
     for i in range(start_step, end_step) :
-        setpos(f((i % nr_steps) / nr_steps))
-        setpos = g.line_to # for subsequent points
+        g.line_to(f((i % nr_steps) / nr_steps))
     #end for
     if closed and start_step % nr_steps == end_step % nr_steps :
         g.close_path()
