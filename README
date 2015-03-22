@@ -58,8 +58,7 @@ And finally we can render the curve out to actual images:
 
     anim_common.render_anim \
       (
-        width = dimensions.x,
-        height = dimensions.y,
+        dimensions = dimensions,
         start_time = 0.0,
         end_time = anim_duration,
         frame_rate = frame_rate,
@@ -108,8 +107,7 @@ a draw procedure which invokes its first argument followed by its second argumen
 
     anim_common.render_anim \
       (
-        width = dimensions.x,
-        height = dimensions.y,
+        dimensions = dimensions,
         start_time = 0.0,
         end_time = anim_duration,
         frame_rate = frame_rate,

@@ -388,8 +388,7 @@ def draw_curve(g, f, closed, nr_steps, start = 0, end = 1) :
 
 def render_anim \
   (
-    width,
-    height,
+    dimensions, # qahirah.Vector
     start_time,
     end_time,
     frame_rate,
@@ -399,7 +398,7 @@ def render_anim \
     start_frame_nr # frame number corresponding to time 0
   ) :
     "renders out an animation to a sequence of PNG image files."
-    pix = qah.ImageSurface.create(qah.CAIRO.FORMAT_ARGB32, (width, height))
+    pix = qah.ImageSurface.create(qah.CAIRO.FORMAT_ARGB32, dimensions)
     g = qah.Context.create(pix)
     if overall_presetup != None :
         overall_presetup(g)
