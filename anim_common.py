@@ -1,19 +1,41 @@
+"""Framework for doing various animations of drawing into a Cairo
+graphics context.
+
+An “interpolator” is a function of a scalar value x (representing the
+current animation time) and returning anything. The result from an
+interpolator is typically passed to a Cairo drawing routine, or to
+some code that uses it for Cairo drawing.
+
+A “draw procedure” takes two arguments (g, t), g being a qahirah.Context
+into which to draw the current frame, and t being the current animation time.
+It can invoke whatever Cairo drawing commands it needs to, taking account
+of the animation time in whatever way it chooses, to render the current
+frame image into the given Context.
+
+This whole framework is based around heavy use of these two kinds of
+routines. A draw procedure will typically invoke interpolators on its
+time argument, and use whatever they return as arguments to drawing
+commands.
+
+You can write your own interpolators and draw procedures from scratch:
+provided they take the right arguments and (in the case of interpolators)
+are identified to the framework as interpolators (using the “interpolator”
+decorator provided below) and return suitable results, the framework
+will work with them. However, you will probably want to take advantage
+of the features provided by this module to make things easier. This
+module provides various predefined forms of interpolator, several useful
+ways of generating and combining interpolators, and a variety of generators
+of draw procedures that will automatically take interpolator arguments into
+account.
+
+For example, the make_draw routine will take a sequence of named methods
+on qahirah.Context objects and corresponding tuples of arguments to them,
+where the latter can contain any mixture of constant values and interpolators.
+The resultant draw procedure will invoke the specified sequence of drawing
+calls, automatically applying any interpolators to the current animation
+time to determine the corresponding argument values for that time.
+"""
 #+
-# Framework for doing various animations of drawing into a Cairo
-# graphics context.
-#
-# An “interpolator” is a function of a scalar value x (representing time)
-# and returning anything. This module provides various predefined forms
-# of interpolator, as well as functions for composing them into new
-# interpolators, and you are free to add your own. But make sure to put
-# your function through the “interpolator” function below (which can be
-# used as a decorator). This allows you to freely pass combinations
-# of interpolators and constant values into the animation framework, and
-# it can automatically tell which values are animated and which are not.
-#
-# A draw procedure takes two arguments (g, t), g being a qahirah.Context
-# into which to draw the current frame, and t being the current frame time.
-#
 # Copyright 2014, 2015 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 # Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
@@ -30,7 +52,7 @@ import qahirah as qah
 
 def interpolator(f) :
     "marks f as an interpolator. All functions to be used as interpolators" \
-    " should be put through this."
+    " must be put through this."
     f.is_interpolator = True
     return f
 #end interpolator
