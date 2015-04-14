@@ -12,7 +12,7 @@ from qahirah import \
     CAIRO, \
     Rect, \
     Vector
-from anim_common import \
+from .common import \
     ensure_interpolator
 
 class Slitscan :
@@ -207,7 +207,7 @@ class SlitscanObjects(Slitscan) :
                     item.width / self.duration * self.steps / item.surface.width,
                     item.height * self.extent / item.surface.height
                   ))
-                g.set_source_surface(item.surface)
+                g.set_source_surface(item.surface, (0, 0))
                 g.paint()
                 g.restore()
             #end if

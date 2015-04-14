@@ -413,13 +413,14 @@ def transform_draw(draw, scale, offset) :
 #-
 
 def draw_curve(g, f, closed, nr_steps, start = 0, end = 1) :
-    "g is a qahirah.Context, f is a function over [0, 1) returning a tuple of" \
-    " (x, y) coordinates, defining the curve to draw, and nr_steps is the" \
-    " number of straight-line segments to approximate the curve. start and end" \
-    " are the relative start and end fractions, in [0, 1], of the actual part" \
-    " of the curve to draw; if omitted, they  default to the entire curve. end" \
-    " can be less than start, to wrap around the curve. If closed, then the end" \
-    " and start points will be joined by an additional segment. The path will be" \
+    "g is a qahirah.Context, f is a function over [0, 1) returning" \
+    " (a value compatible with) a qahirah.Vector of (x, y) coordinates," \
+    " defining the curve to draw, and nr_steps is the number of straight-" \
+    "line segments to approximate the curve. start and end are the relative" \
+    " start and end fractions, in [0, 1], of the actual part of the curve to" \
+    " draw; if omitted, they default to the entire curve. end can be less" \
+    " than start, to wrap around the curve. If closed, then the end and start" \
+    " points will be joined by an additional segment. The path will be" \
     " stroked with the current settings in g."
     g.new_path()
     if end < start :

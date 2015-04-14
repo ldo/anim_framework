@@ -7,7 +7,8 @@
 #-
 
 import math
-import anim_common
+from . import \
+    common
 
 def draw(g, amplitude, freq, offset, phase, nr_steps, start = 0, end = 1) :
     # note freq must be a Fraction
@@ -23,18 +24,18 @@ def draw(g, amplitude, freq, offset, phase, nr_steps, start = 0, end = 1) :
             (r * math.cos(phi), r * math.sin(phi))
     #end curve_func
 
-    anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
+    common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
 #end draw
 
 def make_draw(amplitude, freq, offset, phase, nr_steps, start = 0, end = 1) :
     # note freq must be a Fraction
-    offset = anim_common.ensure_interpolator(offset)
-    amplitude = anim_common.ensure_interpolator(amplitude)
-    freq = anim_common.ensure_interpolator(freq)
-    phase = anim_common.ensure_interpolator(phase)
-    nr_steps = anim_common.ensure_interpolator(nr_steps)
-    start = anim_common.ensure_interpolator(start)
-    end = anim_common.ensure_interpolator(end)
+    offset = common.ensure_interpolator(offset)
+    amplitude = common.ensure_interpolator(amplitude)
+    freq = common.ensure_interpolator(freq)
+    phase = common.ensure_interpolator(phase)
+    nr_steps = common.ensure_interpolator(nr_steps)
+    start = common.ensure_interpolator(start)
+    end = common.ensure_interpolator(end)
 
     def apply_draw(g, x) :
         # note nr_steps must be integer

@@ -9,7 +9,8 @@
 from fractions import \
     Fraction
 import math
-import anim_common
+from . import \
+    common
 
 def draw(g, x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0, end = 1) :
 
@@ -25,7 +26,7 @@ def draw(g, x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0,
             )
     #end curve_func
 
-    anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
+    common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
 #end draw
 
 def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0, end = 1) :
@@ -47,15 +48,15 @@ def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 
           )
     #end apply_draw
 
-    x_amp = anim_common.ensure_interpolator(x_amp)
-    x_freq = anim_common.ensure_interpolator(x_freq)
-    x_phase = anim_common.ensure_interpolator(x_phase)
-    y_amp = anim_common.ensure_interpolator(y_amp)
-    y_freq = anim_common.ensure_interpolator(y_freq)
-    y_phase = anim_common.ensure_interpolator(y_phase)
-    nr_steps = anim_common.ensure_interpolator(nr_steps)
-    start = anim_common.ensure_interpolator(start)
-    end = anim_common.ensure_interpolator(end)
+    x_amp = common.ensure_interpolator(x_amp)
+    x_freq = common.ensure_interpolator(x_freq)
+    x_phase = common.ensure_interpolator(x_phase)
+    y_amp = common.ensure_interpolator(y_amp)
+    y_freq = common.ensure_interpolator(y_freq)
+    y_phase = common.ensure_interpolator(y_phase)
+    nr_steps = common.ensure_interpolator(nr_steps)
+    start = common.ensure_interpolator(start)
+    end = common.ensure_interpolator(end)
     return \
         apply_draw
 #end make_draw

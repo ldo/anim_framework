@@ -9,9 +9,11 @@
 
 from fractions import \
     Fraction
-from turtle import \
-    Vec2D
-import anim_common
+from qahirah import \
+    circle, \
+    Vector
+from . import \
+    common
 
 def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps, start = 0, end = 1) :
     "draws a trochoid curve into the qahirah.Context g. ring_radius is the radius of the" \
@@ -24,26 +26,26 @@ def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps, start = 0, e
     nr_cycles = ratio.denominator # to produce one complete traversal of curve
 
     def curve_func(x) :
-        theta_ring = 360 * nr_cycles * x
+        theta_ring = circle * nr_cycles * x
         theta_wheel = theta_ring * (ring_radius / wheel_radius + 1)
-        wheel_pos = Vec2D(ring_radius + wheel_radius, 0).rotate(theta_ring + phase)
-        curve_pos = wheel_pos + Vec2D(wheel_radius * wheel_frac, 0).rotate(theta_wheel)
-        return tuple(curve_pos)
+        wheel_pos = Vector(ring_radius + wheel_radius, 0).rotate(theta_ring + phase * circle)
+        curve_pos = wheel_pos + Vector(wheel_radius * wheel_frac, 0).rotate(theta_wheel)
+        return curve_pos
     #end curve_func
 
-    anim_common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
+    common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
 #end draw
 
 def make_draw(ring_radius, wheel_radius, wheel_frac, phase, nr_steps, start = 0, end = 1) :
     "returns a draw procedure which will draw a trochoid curve with the specified animatable" \
     " parameters."
-    ring_radius = anim_common.ensure_interpolator(ring_radius)
-    wheel_radius = anim_common.ensure_interpolator(wheel_radius)
-    wheel_frac = anim_common.ensure_interpolator(wheel_frac)
-    phase = anim_common.ensure_interpolator(phase)
-    nr_steps = anim_common.ensure_interpolator(nr_steps)
-    start = anim_common.ensure_interpolator(start)
-    end = anim_common.ensure_interpolator(end)
+    ring_radius = common.ensure_interpolator(ring_radius)
+    wheel_radius = common.ensure_interpolator(wheel_radius)
+    wheel_frac = common.ensure_interpolator(wheel_frac)
+    phase = common.ensure_interpolator(phase)
+    nr_steps = common.ensure_interpolator(nr_steps)
+    start = common.ensure_interpolator(start)
+    end = common.ensure_interpolator(end)
 
     def apply_draw(g, x) :
         "draws a trochoid into the qahirah.Context g with the animated settings" \
