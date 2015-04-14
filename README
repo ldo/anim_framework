@@ -4,6 +4,8 @@ module anim.common contains common definitions for managing time and drawing, wh
 additional modules anim.lissa, anim.rose and anim.troch build on this to render
 animations of Lissajous, rose and trochoid curves respectively.
 
+Installation instructions are in the setup.py script.
+
 anim.common provides a convenience routine, render_anim, which will render out an
 entire animation to a sequence of numbered PNG frames. These can then be re-encoded through
 a tool like FFmpeg <http://ffmpeg.org> into any convenient delivery format, like
@@ -155,10 +157,7 @@ Hopefully that gives you the flavour of the framework, and how easy it is to do
 some quite elaborate animations. By all means, delve further into it, try things out,
 and have fun.
 
-A couple of example animations done with this framework are available on Wikimedia
-Commons, together with the code for generating them:
-  * https://commons.wikimedia.org/wiki/File:Simple_Lissajous_Animation.ogv
-  * https://commons.wikimedia.org/wiki/File:Rose_offset_anim.ogv
+Further code examples are available here: <https://github.com/ldo/anim_framework_examples>.
 
 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>
 2015 April 14
