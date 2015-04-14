@@ -1,10 +1,10 @@
 anim_framework is a set of Python 3 classes for constructing non-real-time animations
 using Cairo graphics via the Qahirah wrapper <https://github.com/ldo/qahirah>. The
-module anim_common contains common definitions for managing time and drawing, while
-additional modules anim_lissa, anim_rose and anim_troch build on this to render
+module anim.common contains common definitions for managing time and drawing, while
+additional modules anim.lissa, anim.rose and anim.troch build on this to render
 animations of Lissajous, rose and trochoid curves respectively.
 
-anim_common provides a convenience routine, render_anim, which will render out an
+anim.common provides a convenience routine, render_anim, which will render out an
 entire animation to a sequence of numbered PNG frames. These can then be re-encoded through
 a tool like FFmpeg <http://ffmpeg.org> into any convenient delivery format, like
 OGV, MPEG-4 etc.
@@ -20,11 +20,11 @@ number of linear steps used to approximate curves:
 
 Now let’s make a simple animating Lissajous curve:
 
-    lissa = anim_lissa.make_draw \
+    lissa = anim.lissa.make_draw \
       (
         x_amp = 300,
         x_freq = 2,
-        x_phase = anim_common.linear_interpolator(0, anim_duration, 0, 1),
+        x_phase = anim.common.linear_interpolator(0, anim_duration, 0, 1),
         y_amp = 300,
         y_freq = 3,
         y_phase = 0,
@@ -36,7 +36,7 @@ set to vary linearly from 0 to 1 over the entire duration of the animation. In g
 any curve parameter can be either a constant value or the result of evaluating a time-dependent
 interpolator. The framework provides a range of basic interpolator types, as well as
 functions for transforming and combining them in various ways, and it is easy enough to
-define your own. So long as you put your custom interpolators through anim_common.interpolator
+define your own. So long as you put your custom interpolators through anim.common.interpolator
 (which can be used as a decorator), the framework will treat them exactly like built-in
 interpolators.
 
@@ -56,7 +56,7 @@ And finally we can render the curve out to actual images:
         g.set_line_width(4)
     #end anim_init
 
-    anim_common.render_anim \
+    anim.common.render_anim \
       (
         dimensions = dimensions,
         start_time = 0.0,
@@ -105,13 +105,13 @@ to the second one.) Now we need a way to ensure this is invoked immediately prio
 lissa draw procedure for each frame. We can use draw_compose for this, to construct
 a draw procedure which invokes its first argument followed by its second argument:
 
-    anim_common.render_anim \
+    anim.common.render_anim \
       (
         dimensions = dimensions,
         start_time = 0.0,
         end_time = anim_duration,
         frame_rate = frame_rate,
-        draw_frame = anim_common.draw_compose(init_frame, lissa),
+        draw_frame = anim.common.draw_compose(init_frame, lissa),
         overall_presetup = anim_init,
         out_dir = "frames",
         start_frame_nr = 1
@@ -122,7 +122,7 @@ be removed, since it is just repeating what is being done in init_frame.) If you
 playing back the new frames, you should now see a nicely-animating clean Lissajous curve.
 
 Now, supposing we want to animate the colour of the curve. The draw procedure returned
-by anim_lissa.make_draw doesn’t have any option for adjusting Cairo settings like the
+by anim.lissa.make_draw doesn’t have any option for adjusting Cairo settings like the
 pen size, colour etc; it simply uses whatever settings are currently in effect. To
 control these settings in an animated fashion, we can add a suitable set_source_colour
 call to our init_frame procedure, and animate it based on the second argument (which we
@@ -130,16 +130,16 @@ were ignoring before). But since init_frame consists of nothing but Cairo calls,
 is a convenience routine to make it easier to define the whole procedure, complete
 with animation:
 
-    init_frame = anim_common.make_draw \
+    init_frame = anim.common.make_draw \
       (
         ("set_source_colour", (Colour.grey(1),)),
         ("paint", ()),
         (
             "set_source_colour",
             (
-                anim_common.hsva_to_colour_interpolator
+                anim.common.hsva_to_colour_interpolator
                   (
-                    h = anim_common.linear_interpolator(0, anim_duration, 0, 1),
+                    h = anim.common.linear_interpolator(0, anim_duration, 0, 1),
                     s = 0.9,
                     v = 0.9,
                     a = 1.0
@@ -161,4 +161,4 @@ Commons, together with the code for generating them:
   * https://commons.wikimedia.org/wiki/File:Rose_offset_anim.ogv
 
 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>
-2015 March 22
+2015 April 14
