@@ -245,32 +245,72 @@ def matrix_interpolator(*args) :
         concat_matrices
 #end matrix_interpolator
 
+def function_interpolator(func, args = None, kwargs = None) :
+    "creates an interpolator that applies func to the arguments *args and" \
+    " keyword arguments **kwargs at a given time. Any of the arguments may" \
+    " be interpolators which will be evaluated at the specified time before" \
+    " being passed to the function."
+
+    @interpolator
+    def apply_function(x) :
+        cur_args = tuple \
+          (
+            arg(x) for arg in args
+          )
+        cur_kwargs = dict \
+          (
+            (k, kwargs[k](x))
+            for k in kwargs
+          )
+        return \
+            func(*cur_args, **cur_kwargs)
+    #end apply_function
+
+#begin function_interpolator
+    if args != None :
+        args = tuple \
+          (
+            ensure_interpolator(arg)
+            for arg in args
+          )
+    else :
+        args = ()
+    #end if
+    if kwargs != None :
+        kwargs = dict \
+          (
+            (k, ensure_interpolator(kwargs[k]))
+            for k in kwargs
+          )
+    else :
+        kwargs = {}
+    #end if
+    return \
+        apply_function
+#end function_interpolator
+
 def hsva_to_colour_interpolator(h, s, v, a) :
     "given h, s, v, a interpolators or constant values, returns an interpolator that" \
     " converts the interpolated values to a qahirah.Colour. Handy because animating" \
     " in HSV space rather than RGB usually gives more useful effects."
-    h = ensure_interpolator(h)
-    s = ensure_interpolator(s)
-    v = ensure_interpolator(v)
-    a = ensure_interpolator(a)
-    return interpolator \
-      (
-        lambda x : qah.Colour.from_hsva((h(x), s(x), v(x), a(x)))
-      )
+    return \
+        function_interpolator \
+          (
+            func = lambda h, s, v, a : qah.Colour.from_hsva((h, s, v, a)),
+            args = (h, s, v, a)
+          )
 #end hsva_to_colour_interpolator
 
 def hlsa_to_colour_interpolator(h, l, s, a) :
     "given h, l, s, a interpolators or constant values, returns an interpolator that" \
     " converts the interpolated values to a qahirah.Colour. Handy because animating" \
     " in HLS space rather than RGB usually gives more useful effects."
-    h = ensure_interpolator(h)
-    l = ensure_interpolator(l)
-    s = ensure_interpolator(s)
-    a = ensure_interpolator(a)
-    return interpolator \
-      (
-        lambda x : qah.Colour.from_hlsa((h(x), l(x), s(x), a(x)))
-      )
+    return \
+        function_interpolator \
+          (
+            func = lambda h, l, s, a : qah.Colour.from_hlsa((h, l, s, a)),
+            args = (h, l, s, a)
+          )
 #end hlsa_to_colour_interpolator
 
 #+
