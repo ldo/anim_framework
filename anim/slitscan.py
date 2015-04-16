@@ -77,7 +77,7 @@ class Slitscan :
 
     def render(self, g, at_time, from_pos, from_extent, to_pos, to_extent) :
         "updates the current state of the pattern and draws it into destination qahirah.Context" \
-        " g. The line from Vectors from_pos to to_pos defines the  starting and ending" \
+        " g. The line from Vectors from_pos to to_pos defines the starting and ending" \
         " points of the animation trajectory, while from_extent and to_extent define the extents" \
         " of the image perpendicular to this direction at these points, the ratio of the values" \
         " defining the amount of perspective foreshortening."
