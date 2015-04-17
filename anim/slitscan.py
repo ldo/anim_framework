@@ -222,6 +222,12 @@ class SlitscanObjects(Slitscan) :
 #end SlitscanObjects
 
 def make_draw(slitscan, from_pos, from_extent, to_pos, to_extent) :
+    "constructs a draw procedure which will tell the specified Slitscan object" \
+    " to render itself according to the current animation time. The line from Vectors" \
+    " from_pos to to_pos defines the starting and ending points of the animation" \
+    " trajectory, while from_extent and to_extent define the extents of the image" \
+    " perpendicular to this direction at these points, the ratio of the values" \
+    " defining the amount of perspective foreshortening."
     from_pos = ensure_interpolator(from_pos)
     from_extent = ensure_interpolator(from_extent)
     to_pos = ensure_interpolator(to_pos)
