@@ -166,7 +166,7 @@ class Slitscan :
 #end Slitscan
 
 class SlitscanObjects(Slitscan) :
-    "draws a series of objects arranged in time and space. items is a sequence of Item," \
+    "draws a series of static objects arranged in time and space. items is a sequence of Item," \
     " (see the inner class definition) in the order in which they are to be drawn (which" \
     " need not correspond to their ordering in time); extent, steps, duration and background" \
     " have the same meanings as for the Slitscan superclass."
