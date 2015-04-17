@@ -162,22 +162,6 @@ def piecewise_linear_interpolator(x_vals, y_vals) :
           )
 #end piecewise_linear_interpolator
 
-def func_interpolator(func, *args) :
-    "given a function of n args, and n interpolators or constant values, returns an" \
-    " interpolator which will return the function of those (interpolated) values at" \
-    " the specified time."
-    if len(args) == 1 and type(args[0]) == tuple :
-        args = args[0]
-    #end if
-    args = tuple \
-      (
-        ensure_interpolator(arg)
-        for arg in args
-      )
-    return \
-        interpolator(lambda x : func(*tuple(arg(x) for arg in args)))
-#end func_interpolator
-
 def periodic_interpolator(from_x, to_x, interp, offset = 0) :
     "given an existing interpolator defined over the domain [from_x, to_x], returns" \
     " an interpolator which repeats the same function over equal-sized intervals" \
