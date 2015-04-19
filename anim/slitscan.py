@@ -271,3 +271,21 @@ def make_static_draw(*draw_settings) :
     return \
         apply_settings
 #end make_static_draw
+
+def make_image(dimensions, draw) :
+    "constructs a qahirah.ImageSurface of the specified dimensions, calls draw with a qahirah" \
+    " Context to render into it, and returns it. When draw is called, the transformation is" \
+    " set to map (0, 0, 1, 1) to the bounds of the image."
+    pix = qah.ImageSurface.create \
+      (
+        format = CAIRO.FORMAT_ARGB32,
+        dimensions = dimensions
+      )
+    g = qah.Context.create(pix)
+    g.scale(dimensions)
+    g.set_operator(CAIRO.OPERATOR_OVER)
+    draw(g)
+    pix.flush()
+    return \
+        pix
+#end make_image
