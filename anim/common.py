@@ -436,6 +436,36 @@ def transform_draw(draw, scale, offset) :
 # Higher-level useful stuff
 #-
 
+def make_static_draw(*draw_settings) :
+    "draw_settings must be a tuple of 2-tuples; in each 2-tuple, the first element is" \
+    " a qahirah.Context method name, and the second element is a tuple of arguments to that" \
+    " method. This function returns a procedure that applies the specified settings to a" \
+    " given Cairo context."
+
+    def apply_settings(g) :
+        for method, args in draw_settings :
+            getattr(g, method)(*args)
+        #end for
+    #end apply_settings
+
+#begin make_static_draw
+    if (
+            len(draw_settings) == 1
+        and
+            type(draw_settings[0]) == tuple
+        and
+                (
+                    len(draw_settings[0]) != 2
+                or
+                    len(draw_settings[0]) == 2 and type(draw_settings[0][0]) != str
+                )
+    ) :
+        draw_settings = draw_settings[0]
+    #end if
+    return \
+        apply_settings
+#end make_static_draw
+
 def draw_curve(g, f, closed, nr_steps, start = 0, end = 1) :
     "g is a qahirah.Context, f is a function over [0, 1) returning" \
     " (a value compatible with) a qahirah.Vector of (x, y) coordinates," \
