@@ -488,7 +488,7 @@ def render_anim \
         pix.flush()
         pix.write_to_png \
           (
-            os.path.join(out_dir, "%04d.png" % (frame_nr + start_frame_nr))
+            os.path.join(out_dir, "{:04d}.png".format(frame_nr + start_frame_nr))
           )
     #end for
     return \
