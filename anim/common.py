@@ -42,8 +42,10 @@ time to determine the corresponding argument values for that time.
 
 from types import \
     FunctionType
+import sys
 import os
 import math
+import time
 import qahirah as qah
 
 #+
@@ -480,6 +482,10 @@ def render_anim \
     #end if
     from_frame_nr = math.ceil(start_time * frame_rate)
     to_frame_nr = math.ceil(end_time * frame_rate)
+    show_progress = os.getenv("ANIM_PROGRESS", "") != "" and sys.stderr.isatty()
+    if show_progress :
+        last_time = time.time()
+    #end if
     for frame_nr in range(from_frame_nr, to_frame_nr) :
         g.save()
         t = frame_nr / frame_rate
@@ -490,6 +496,13 @@ def render_anim \
           (
             os.path.join(out_dir, "{:04d}.png".format(frame_nr + start_frame_nr))
           )
+        if show_progress and time.time() - last_time >= 5.0 :
+            last_time = time.time()
+            sys.stderr.write \
+              (
+                "{}: done frame {}/{}\n".format(sys.argv[0], frame_nr, to_frame_nr - from_frame_nr)
+              )
+        #end if
     #end for
     return \
         (from_frame_nr, to_frame_nr)
