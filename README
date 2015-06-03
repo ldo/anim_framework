@@ -52,10 +52,10 @@ And finally we can render the curve out to actual images:
 
     def anim_init(g) :
         g.translate(dimensions / 2)
-        g.set_source_colour(qahirah.Colour.grey(1))
+        g.source_colour = qahirah.Colour.grey(1)
         g.paint()
-        g.set_source_colour(qahirah.Colour.from_hsva((0.25, 0.9, 0.9)))
-        g.set_line_width(4)
+        g.source_colour = qahirah.Colour.from_hsva((0.25, 0.9, 0.9))
+        g.line_width = 4
     #end anim_init
 
     anim.common.render_anim \
@@ -97,9 +97,9 @@ What you want is to start with a white background for each frame. This can be do
 with a custom draw procedure as simple as
 
     def init_frame(g, t) :
-        g.set_source_colour(qahirah.Colour.grey(1)) # background colour
+        g.source_colour = qahirah.Colour.grey(1) # background colour
         g.paint()
-        g.set_source_colour(qahirah.Colour.from_hsva((0.25, 0.9, 0.9))) # curve colour
+        g.source_colour = qahirah.Colour.from_hsva((0.25, 0.9, 0.9)) # curve colour
     #end init_frame
 
 (Note to be a draw procedure it has to take two arguments, even though it pays no attention
@@ -160,4 +160,4 @@ and have fun.
 Further code examples are available here: <https://github.com/ldo/anim_framework_examples>.
 
 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>
-2015 April 14
+2015 June 3
