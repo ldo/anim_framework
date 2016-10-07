@@ -15,6 +15,12 @@ from . import \
     common
 
 def draw(g, amplitude, delta, mod, freq, offset, phase, start = 0, end = None) :
+    "draws a Maurer rose into the qahirah.Context g. amplitude is the amplitude" \
+    " of the sine wave, delta the number of steps between successive curve points" \
+    " (the “d” parameter from the Maurer paper), mod the modulus (total number of" \
+    " steps around curve) (the “z” parameter from the Maurer paper), freq the" \
+    " “n” parameter from the Maurer paper, offset the offset of the curve from" \
+    " the centre, and phase the phase angle for rotating the whole curve."
 
     k = gcd(delta, mod) # number of points per subcurve
 
