@@ -490,9 +490,8 @@ def draw_curve_discrete(g, f, closed, nr_steps, start = 0, end = None, subcurve 
             if last_subcurve != None :
                 if closed :
                     g.close_path()
-                else :
-                    g.new_sub_path()
                 #end if
+                g.new_sub_path()
             #end if
             last_subcurve = this_subcurve
         #end if
