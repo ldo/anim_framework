@@ -1,8 +1,9 @@
 anim_framework is a set of Python 3 classes for constructing non-real-time animations
 using Cairo graphics via the Qahirah wrapper <https://github.com/ldo/qahirah>. The
 module anim.common contains common definitions for managing time and drawing, while
-additional modules anim.lissa, anim.maurer, anim.rose and anim.troch build on this to render
-animations of Lissajous, Maurer, rose and trochoid curves respectively.
+additional modules anim.lissa, anim.maurer, anim.rose, anim.troch and anim.whirl
+build on this to render animations of Lissajous, Maurer, rose, trochoid and
+whirl curves respectively.
 
 Installation instructions are in the setup.py script.
 
