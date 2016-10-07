@@ -13,7 +13,7 @@ import distutils.core
 distutils.core.setup \
   (
     name = "anim_framework",
-    version = "0.7",
+    version = "0.8",
     description = "framework for scripted animations, for Python 3.3 or later",
     author = "Lawrence D'Oliveiro",
     author_email = "ldo@geek-central.gen.nz",
