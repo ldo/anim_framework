@@ -39,7 +39,16 @@ def draw(g, amplitude, delta, mod, freq, offset, phase, start = 0, end = None) :
             qah.Vector(r * math.cos(phi), r * math.sin(phi))
     #end curve_func
 
-    common.draw_curve_discrete(g, f = curve_func, closed = True, nr_steps = mod, start = start, end = end, subcurve = subcurve_func)
+    common.draw_curve_discrete \
+      (
+        g = g,
+        f = curve_func,
+        closed = True,
+        nr_steps = mod,
+        start = start,
+        end = end,
+        subcurve = subcurve_func
+      )
 #end draw
 
 def make_draw(amplitude, delta, mod, freq, offset, phase, start = 0, end = None) :

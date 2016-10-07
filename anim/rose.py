@@ -24,7 +24,15 @@ def draw(g, amplitude, freq, offset, phase, nr_steps, start = 0, end = 1) :
             (r * math.cos(phi), r * math.sin(phi))
     #end curve_func
 
-    common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
+    common.draw_curve \
+      (
+        g = g,
+        f = curve_func,
+        closed = True,
+        nr_steps = nr_steps,
+        start = start,
+        end = end
+      )
 #end draw
 
 def make_draw(amplitude, freq, offset, phase, nr_steps, start = 0, end = 1) :

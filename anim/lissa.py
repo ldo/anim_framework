@@ -26,7 +26,15 @@ def draw(g, x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0,
             )
     #end curve_func
 
-    common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
+    common.draw_curve \
+      (
+        g = g,
+        f = curve_func,
+        closed = True,
+        nr_steps = nr_steps,
+        start = start,
+        end = end
+      )
 #end draw
 
 def make_draw(x_amp, x_freq, x_phase, y_amp, y_freq, y_phase, nr_steps, start = 0, end = 1) :

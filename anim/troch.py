@@ -33,7 +33,15 @@ def draw(g, ring_radius, wheel_radius, wheel_frac, phase, nr_steps, start = 0, e
         return curve_pos
     #end curve_func
 
-    common.draw_curve(g, f = curve_func, closed = True, nr_steps = nr_steps, start = start, end = end)
+    common.draw_curve \
+      (
+        g = g,
+        f = curve_func,
+        closed = True,
+        nr_steps = nr_steps,
+        start = start,
+        end = end
+      )
 #end draw
 
 def make_draw(ring_radius, wheel_radius, wheel_frac, phase, nr_steps, start = 0, end = 1) :
