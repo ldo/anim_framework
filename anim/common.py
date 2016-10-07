@@ -36,7 +36,7 @@ calls, automatically applying any interpolators to the current animation
 time to determine the corresponding argument values for that time.
 """
 #+
-# Copyright 2014, 2015 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
+# Copyright 2014-2016 by Lawrence D'Oliveiro <ldo@geek-central.gen.nz>.
 # Licensed under CC-BY-SA <http://creativecommons.org/licenses/by-sa/4.0/>.
 #-
 
@@ -462,6 +462,47 @@ def draw_curve(g, f, closed, nr_steps, start = 0, end = 1) :
     #end if
     g.stroke()
 #end draw_curve
+
+def draw_curve_discrete(g, f, closed, nr_steps, start = 0, end = None, subcurve = lambda n : 0) :
+    "g is a qahirah.Context, f is a function over [0, nr_steps) returning" \
+    " (a value compatible with) a qahirah.Vector of (x, y) coordinates," \
+    " defining the curve to draw, and nr_steps is the number of discrete steps" \
+    " making up the curve. start and end are the start and end steps, in" \
+    " [0, nr_steps], of the actual part of the curve to draw; if omitted," \
+    " they default to the entire curve. end can be less than start, to wrap" \
+    " around the curve. If closed, then the end and start points will be" \
+    " joined by an additional segment. subcurve is an optional function that divides" \
+    " the curve into subcurves; every time it returns a different (integer) value," \
+    " a new subcurve is started.\n" \
+    "\n" \
+    "The path will be stroked with the current settings in g."
+    g.new_path()
+    if end == None :
+        end = nr_steps
+    #end if
+    if end < start :
+        end += nr_steps
+    #end if
+    last_subcurve = None
+    for i in range(start, end) :
+        this_subcurve = subcurve(i)
+        if this_subcurve != last_subcurve :
+            if last_subcurve != None :
+                if closed :
+                    g.close_path()
+                else :
+                    g.new_sub_path()
+                #end if
+            #end if
+            last_subcurve = this_subcurve
+        #end if
+        g.line_to(f(i % nr_steps))
+    #end for
+    if last_subcurve != None and closed and start % nr_steps == end % nr_steps :
+        g.close_path()
+    #end if
+    g.stroke()
+#end draw_curve_discrete
 
 def render_anim \
   (
