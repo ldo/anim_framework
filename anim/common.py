@@ -418,6 +418,34 @@ def draw_sequence(x_vals, draws) :
         select_from_sequence
 #end draw_sequence
 
+def draw_sequential(items, before, after, duration, offset) :
+    "alternative formulation of draw_sequence, where items is a sequence of" \
+    " (draw_duration, draw) tuples, where draw is a draw procedure and" \
+    " draw_duration is the (relative) duration over which to call" \
+    " that draw procedure. duration is the total duration of the sequence," \
+    " and offset is the start time of the first draw call."
+    if before == None :
+        before = null_draw
+    #end if
+    if after == None :
+        after = null_draw
+    #end if
+    x_vals = [0]
+    draws = [before]
+    total_x = 0
+    for dur, draw in items :
+        total_x += dur
+        x_vals.append(total_x)
+        draws.append(draw)
+    #end for
+    draws.append(after)
+    for i in range(len(x_vals)) :
+        x_vals[i] = x_vals[i] * duration / total_x + offset
+    #end for
+    return \
+        draw_sequence(x_vals, draws)
+#end draw_sequential
+
 def retime_draw(draw, interp) :
     "returns a draw procedure which invokes draw with the time transformed through interp."
     def apply_draw(g, x) :
