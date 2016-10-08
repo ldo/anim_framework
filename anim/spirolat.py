@@ -89,12 +89,12 @@ def make_draw(step, n, angle, reversed, phase, start = 0, end = None) :
     def apply_draw(g, x) :
         "draws a spirolateral curve into the qahirah.Context g with the animated settings" \
         " appropriate to time x."
-        # note delta, mod and freq must be integers
+        # note n must be integer and angle must be Fraction
         draw \
           (
             g = g,
             step = step(x),
-            n = n(x),
+            n = round(n(x)),
             angle = angle(x),
             reversed = reversed(x),
             phase = phase(x),
