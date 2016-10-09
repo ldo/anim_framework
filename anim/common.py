@@ -257,14 +257,19 @@ def tuple_interpolator(t) :
     " time. Any elements of t which are interpolators are substituted with" \
     " their evaluated values at that time."
 
+    seq = type(t)
+
     @interpolator
     def eval_tuple(x) :
         return \
-            tuple(i(x) for i in t)
+            seq(i(x) for i in t)
     #end eval_tuple
 
 #begin tuple_interpolator
-    t = tuple \
+    if seq not in (list, tuple) :
+        raise TypeError("type of arg must be list or tuple")
+    #end if
+    t = seq \
       (
         ensure_interpolator(i)
         for i in t
