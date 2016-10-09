@@ -423,7 +423,9 @@ def draw_sequential(items, before, after, duration, offset) :
     " (draw_duration, draw) tuples, where draw is a draw procedure and" \
     " draw_duration is the (relative) duration over which to call" \
     " that draw procedure. duration is the total duration of the sequence," \
-    " and offset is the start time of the first draw call."
+    " and offset is the start time of the first draw call. before and after," \
+    " if not None, are additional draw procedures; before will be invoked before" \
+    " the start time, and after will be invoked after the end time."
     if before == None :
         before = null_draw
     #end if
