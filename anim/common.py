@@ -217,7 +217,7 @@ def step_interpolator(x_vals, y_vals) :
         step_interpolate
 #end step_interpolator
 
-def transform_interpolator(interp, scale, offset) :
+def transform_interpolator(interp, scale = 1, offset = 0) :
     "returns an interpolator which is interp operating on an x-coordinate subjected" \
     " to the specified scale and offset."
     return \
