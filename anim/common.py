@@ -252,6 +252,44 @@ def matrix_interpolator(*args) :
         concat_matrices
 #end matrix_interpolator
 
+def tuple_interpolator(t) :
+    "creates an interpolator that returns a copy of the tuple t at a given" \
+    " time. Any elements of t which are interpolators are substituted with" \
+    " their evaluated values at that time."
+
+    @interpolator
+    def eval_tuple(x) :
+        return \
+            tuple(i(x) for i in t)
+    #end eval_tuple
+
+#begin tuple_interpolator
+    t = tuple \
+      (
+        ensure_interpolator(i)
+        for i in t
+      )
+    return \
+        eval_tuple
+#end tuple_interpolator
+
+def dict_interpolator(d) :
+    "creates an interpolator that returns a copy of the dictionary d at a" \
+    " given time. Any of the values in d which are interpolators are" \
+    " substituted with their evaluated values at that time."
+
+    @interpolator
+    def eval_dict(x) :
+        return \
+            dict((k, d[k](x)) for k in d)
+    #end eval_dict
+
+#begin dict_interpolator
+    d = dict((k, ensure_interpolator(d[k])) for k in d)
+    return \
+        eval_dict
+#end dict_interpolator
+
 def function_interpolator(func, args = None, kwargs = None) :
     "creates an interpolator that applies func to the arguments *args and" \
     " keyword arguments **kwargs at a given time. Any of the arguments may" \
