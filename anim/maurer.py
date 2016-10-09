@@ -14,7 +14,7 @@ import qahirah as qah
 from . import \
     common
 
-def draw(g, amplitude, delta, mod, freq, offset, phase, start = 0, end = None) :
+def draw(g, amplitude, delta, mod, freq, offset, phase, start = 0, end = 1) :
     "draws a Maurer rose into the qahirah.Context g. amplitude is the amplitude" \
     " of the sine wave, delta the number of steps between successive curve points" \
     " (the “d” parameter from the Maurer paper), mod the modulus (total number of" \
@@ -51,7 +51,7 @@ def draw(g, amplitude, delta, mod, freq, offset, phase, start = 0, end = None) :
       )
 #end draw
 
-def make_draw(amplitude, delta, mod, freq, offset, phase, start = 0, end = None) :
+def make_draw(amplitude, delta, mod, freq, offset, phase, start = 0, end = 1) :
     "returns a draw procedure which will draw a Maurer rose with the specified animatable" \
     " parameters."
     amplitude = common.ensure_interpolator(amplitude)

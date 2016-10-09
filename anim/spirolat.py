@@ -15,7 +15,7 @@ from qahirah import \
 from . import \
     common
 
-def draw(g, step, n, angle, reversed, phase, start = 0, end = None) :
+def draw(g, step, n, angle, reversed, phase, start = 0, end = 1) :
     "draws a spirolateral curve into the qahirah.Context g. step is the length" \
     " of a unit step, n is the maximum line length in unit steps, angle is the" \
     " angle between line segments as a rational Fraction of a circle, reversed" \
@@ -75,7 +75,7 @@ def draw(g, step, n, angle, reversed, phase, start = 0, end = None) :
       )
 #end draw
 
-def make_draw(step, n, angle, reversed, phase, start = 0, end = None) :
+def make_draw(step, n, angle, reversed, phase, start = 0, end = 1) :
     "returns a draw procedure which will draw a spirolateral curve with the" \
     " specified animatable parameters."
     step = common.ensure_interpolator(step)

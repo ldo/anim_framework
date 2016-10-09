@@ -552,12 +552,12 @@ def draw_curve(g, f, closed, nr_steps, start = 0, end = 1) :
     g.stroke()
 #end draw_curve
 
-def draw_curve_discrete(g, f, closed, nr_steps, start = 0, end = None, subcurve = lambda n : 0) :
+def draw_curve_discrete(g, f, closed, nr_steps, start = 0, end = 1, subcurve = lambda n : 0) :
     "g is a qahirah.Context, f is a function over [0, nr_steps) returning" \
     " (a value compatible with) a qahirah.Vector of (x, y) coordinates," \
     " defining the curve to draw, and nr_steps is the number of discrete steps" \
-    " making up the curve. start and end are the start and end steps, in" \
-    " [0, nr_steps], of the actual part of the curve to draw; if omitted," \
+    " making up the curve. start and end are the relative start and end fractions," \
+    " in [0, 1], of the actual part of the curve to draw; if omitted," \
     " they default to the entire curve. end can be less than start, to wrap" \
     " around the curve. If closed, then the end and start points will be" \
     " joined by an additional segment. subcurve is an optional function that divides" \
@@ -566,14 +566,13 @@ def draw_curve_discrete(g, f, closed, nr_steps, start = 0, end = None, subcurve 
     "\n" \
     "The path will be stroked with the current settings in g."
     g.new_path()
-    if end == None :
-        end = nr_steps
-    #end if
     if end < start :
-        end += nr_steps
+        end += 1
     #end if
+    n_start = round(start * nr_steps)
+    n_end = round(end * nr_steps)
     last_subcurve = None
-    for i in range(start, end) :
+    for i in range(n_start, n_end) :
         this_subcurve = subcurve(i)
         if this_subcurve != last_subcurve :
             if last_subcurve != None :
@@ -586,7 +585,7 @@ def draw_curve_discrete(g, f, closed, nr_steps, start = 0, end = None, subcurve 
         #end if
         g.line_to(f(i % nr_steps))
     #end for
-    if last_subcurve != None and closed and start % nr_steps == end % nr_steps :
+    if last_subcurve != None and closed and n_start % nr_steps == end % nr_steps :
         g.close_path()
     #end if
     g.stroke()

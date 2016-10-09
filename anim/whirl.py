@@ -13,7 +13,7 @@ import qahirah as qah
 from . import \
     common
 
-def draw(g, radius, nr_sides, poly_shrink, nr_polys, phase, start = 0, end = None) :
+def draw(g, radius, nr_sides, poly_shrink, nr_polys, phase, start = 0, end = 1) :
     "draws a whirl pattern into the qahirah.Context g. radius is the radius of" \
     " the outermost polygon, nr_sides is the number of sides per polygon," \
     " poly_shrink is the shrink factor for each successive nested polygon," \
@@ -64,7 +64,7 @@ def draw(g, radius, nr_sides, poly_shrink, nr_polys, phase, start = 0, end = Non
       )
 #end draw
 
-def make_draw(radius, nr_sides, poly_shrink, nr_polys, phase, start = 0, end = None) :
+def make_draw(radius, nr_sides, poly_shrink, nr_polys, phase, start = 0, end = 1) :
     "returns a draw procedure which will draw a whirl pattern with the specified animatable" \
     " parameters."
     radius = common.ensure_interpolator(radius)
