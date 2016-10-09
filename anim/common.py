@@ -145,6 +145,27 @@ def piecewise_interpolator(x_vals, interps) :
         interpolate
 #end piecewise_interpolator
 
+def piecewise_sequential_interpolator(items, duration, offset) :
+    "alternative formulation of piecewise_interpolator, where items is a sequence of" \
+    " (rel_duration, interp) tuples, where interp is an interpolator and" \
+    " rel_duration is the (relative) duration over which to use" \
+    " that interpolator. duration is the total duration of the sequence," \
+    " and offset is the start time of the first interpolation interval."
+    x_vals = [0]
+    interps = []
+    total_x = 0
+    for dur, interp in items :
+        total_x += dur
+        x_vals.append(total_x)
+        interps.append(interp)
+    #end for
+    for i in range(len(x_vals)) :
+        x_vals[i] = x_vals[i] * duration / total_x + offset
+    #end for
+    return \
+        piecewise_interpolator(x_vals, interps)
+#end piecewise_sequential_interpolator
+
 def piecewise_linear_interpolator(x_vals, y_vals) :
     "x_vals must be a monotonically-increasing sequence of x-values, defining" \
     " domain segments, and y_vals must be a monotically-increasing sequence of" \
