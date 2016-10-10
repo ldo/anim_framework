@@ -76,6 +76,13 @@ def ensure_interpolator(f) :
         f if is_interpolator(f) else constant_interpolator(f)
 #end ensure_interpolator
 
+def ensure_all_interpolators(*args) :
+    "calls ensure_interpolator on all elements of args, returning the tuple of" \
+    " results."
+    return \
+        tuple(ensure_interpolator(f) for f in args)
+#end ensure_all_interpolators
+
 def linear_interpolator(from_x, to_x, from_y, to_y) :
     "returns a function of x in the range [from_x .. to_x] which returns" \
     " the corresponding linearly-interpolated value in the range [from_y .. to_y]."
