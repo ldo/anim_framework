@@ -578,7 +578,7 @@ def draw_curve_discrete(g, f, closed, nr_steps, start = 0, end = 1, subcurve = l
     n_end = round(end * nr_steps)
     last_subcurve = None
     for i in range(n_start, n_end) :
-        this_subcurve = subcurve(i)
+        this_subcurve = subcurve(i % nr_steps)
         if this_subcurve != last_subcurve :
             if last_subcurve != None :
                 if closed :
