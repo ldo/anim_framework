@@ -603,6 +603,44 @@ def draw_curve_discrete(g, f, closed, nr_steps, start = 0, end = 1, subcurve = l
     g.stroke()
 #end draw_curve_discrete
 
+class FrameTimeCalc :
+    "conversions between frame numbers and animation times."
+
+    def __init__(self, start_time, end_time, frame_rate, start_frame_nr) :
+        "start_frame_nr is the frame number that starts at start_time, and" \
+        " frame_rate is the number of frames per unit time."
+        self.start_time = start_time
+        self.end_time = end_time
+        self.frame_rate = frame_rate
+        self.start_frame_nr = start_frame_nr
+    #end __init__
+
+    def time_to_frame(self, t, round_up = False) :
+        "converts a time to the number of the frame visible at that time (if not round_up)."
+        return \
+            (math.floor, math.ceil)[round_up] \
+              (
+                (t - self.start_time) * self.frame_rate + self.start_frame_nr
+              )
+    #end time_to_frame
+
+    def frame_to_time(self, n) :
+        "returns the start time of the frame with the specified number."
+        return \
+            ((n - self.start_frame_nr) / self.frame_rate + self.start_time)
+    #end frame_to_time
+
+    def each_frame(self, final_partial = False) :
+        "iterates (time, framenr) tuples over the specified time."
+        from_frame_nr = self.start_frame_nr
+        to_frame_nr = self.time_to_frame(self.end_time, round_up = final_partial)
+        for frame_nr in range(from_frame_nr, to_frame_nr) :
+            yield (self.frame_to_time(frame_nr), frame_nr)
+        #end for
+    #end each_frame
+
+#end FrameTimeCalc
+
 def render_anim \
   (
     dimensions, # qahirah.Vector
@@ -620,27 +658,44 @@ def render_anim \
     if overall_presetup != None :
         overall_presetup(g)
     #end if
-    from_frame_nr = math.ceil(start_time * frame_rate)
-    to_frame_nr = math.ceil(end_time * frame_rate)
+    frame_times = FrameTimeCalc \
+      (
+        start_time = start_time,
+        end_time = end_time,
+        frame_rate = frame_rate,
+        start_frame_nr = start_frame_nr,
+      )
+    final_partial = True
+    from_frame_nr = start_frame_nr
+    to_frame_nr = frame_times.time_to_frame(end_time, round_up = final_partial)
     show_progress = os.getenv("ANIM_PROGRESS", "") != "" and sys.stderr.isatty()
     if show_progress :
         last_time = time.time()
     #end if
-    for frame_nr in range(from_frame_nr, to_frame_nr) :
+    for t, frame_nr in \
+        frame_times.each_frame \
+          (
+            final_partial = final_partial
+          ) \
+    :
         g.save()
-        t = frame_nr / frame_rate
         draw_frame(g, t)
         g.restore()
         pix.flush()
         pix.write_to_png \
           (
-            os.path.join(out_dir, "{:04d}.png".format(frame_nr + start_frame_nr))
+            os.path.join(out_dir, "{:04d}.png".format(frame_nr))
           )
         if show_progress and time.time() - last_time >= 5.0 :
             last_time = time.time()
             sys.stderr.write \
               (
-                "{}: done frame {}/{}\n".format(sys.argv[0], frame_nr, to_frame_nr - from_frame_nr)
+                "{}: done frame {}/{}\n".format
+                  (
+                    sys.argv[0],
+                    frame_nr - from_frame_nr + start_frame_nr,
+                    to_frame_nr - from_frame_nr,
+                  )
               )
         #end if
     #end for
