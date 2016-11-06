@@ -665,7 +665,7 @@ def render_anim \
         frame_rate = frame_rate,
         start_frame_nr = start_frame_nr,
       )
-    final_partial = True
+    final_partial = False
     from_frame_nr = start_frame_nr
     to_frame_nr = frame_times.time_to_frame(end_time, round_up = final_partial)
     show_progress = os.getenv("ANIM_PROGRESS", "") != "" and sys.stderr.isatty()
