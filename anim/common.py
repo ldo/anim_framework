@@ -238,7 +238,7 @@ def matrix_interpolator(*args) :
 
     @interpolator
     def concat_matrices(x) :
-        result = qah.Matrix.identity()
+        result = qah.Matrix.identity
         for f in args :
             result *= f(x)
         #end for
