@@ -1,15 +1,16 @@
 anim_framework is a set of Python 3 classes for constructing non-real-time animations
-using Cairo graphics via the Qahirah wrapper <https://github.com/ldo/qahirah>. The
-module anim.common contains common definitions for managing time and drawing, while
-additional modules anim.lissa, anim.maurer, anim.rose, anim.spirolat, anim.troch and
-anim.whirl build on this to render animations of Lissajous, Maurer, rose,
-spirolateral and trochoid and whirl curves respectively.
+using Cairo graphics via the Qahirah wrapper ([GitLab](https://gitlab.com/ldo/qahirah),
+[GitHub](https://github.com/ldo/qahirah)). The module `anim.common` contains common
+definitions for managing time and drawing, while additional modules `anim.lissa`,
+`anim.maurer`, `anim.rose`, `anim.spirolat`, `anim.troch` and `anim.whirl` build on this
+to render animations of Lissajous, Maurer, rose, spirolateral and trochoid and whirl
+curves respectively.
 
-Installation instructions are in the setup.py script.
+Installation instructions are in the `setup.py` script.
 
-anim.common provides a convenience routine, render_anim, which will render out an
-entire animation to a sequence of numbered PNG frames. These can then be re-encoded through
-a tool like FFmpeg <http://ffmpeg.org> into any convenient delivery format, like
+`anim.common` provides a convenience routine, `render_anim`, which will render out an
+entire animation to a sequence of numbered PNG frames. These can then be re-encoded
+through a tool like [FFmpeg](http://ffmpeg.org) into any convenient delivery format, like
 OGV, MPEG-4 etc.
 
 To illustrate the process, let’s start by defining some example parameters: the duration
@@ -34,20 +35,20 @@ Now let’s make a simple animating Lissajous curve:
         nr_steps = nr_steps,
       )
 
-Note that in this example all the parameters are constant, except for the x_phase, which is
-set to vary linearly from 0 to 1 over the entire duration of the animation. In general,
-any curve parameter can be either a constant value or the result of evaluating a time-dependent
-interpolator. The framework provides a range of basic interpolator types, as well as
-functions for transforming and combining them in various ways, and it is easy enough to
-define your own. So long as you put your custom interpolators through anim.common.interpolator
-(which can be used as a decorator), the framework will treat them exactly like built-in
-interpolators.
+Note that in this example all the parameters are constant, except for the `x_phase`, which
+is set to vary linearly from 0 to 1 over the entire duration of the animation. In general,
+any curve parameter can be either a constant value or the result of evaluating a
+time-dependent interpolator. The framework provides a range of basic interpolator types,
+as well as functions for transforming and combining them in various ways, and it is easy
+enough to define your own. So long as you put your custom interpolators through
+`anim.common.interpolator` (which can be used as a decorator), the framework will treat
+them exactly like built-in interpolators.
 
-The result returned by the above make_draw call is a “draw procedure”, which is a procedure
-that takes two arguments: a Cairo graphics context, and the current time. It does whatever
-is necessary to render the image into that context at that time. The framework provides
-functions for combining draw procedures, remapping them through time, etc. And of course
-you can define your own.
+The result returned by the above `make_draw` call is a “draw procedure”, which is a
+procedure that takes two arguments: a Cairo graphics context, and the current time. It
+does whatever is necessary to render the image into that context at that time. The
+framework provides functions for combining draw procedures, remapping them through time,
+etc. And of course you can define your own.
 
 And finally we can render the curve out to actual images:
 
@@ -72,8 +73,8 @@ And finally we can render the curve out to actual images:
       )
 
 which will run for a few seconds or so to generate 250 frames. This requires that a
-subdirectory called “frames” be created, into which the frames will be written under
-the names “0001.png”, “0002.png” etc. The FFmpeg package provides the “ffplay” command,
+subdirectory called “`frames`” be created, into which the frames will be written under the
+names “`0001.png`”, “`0002.png`” etc. The FFmpeg package provides the “`ffplay`” command,
 which can directly play the PNG frames using a command like
 
     ffplay -autoexit frames/%04d.png
@@ -82,20 +83,20 @@ or, if you want playback to loop:
 
     ffplay -loop 0 frames/%04d.png
 
-Note the definition of anim_init, which is called by render_anim after it creates the
+Note the definition of `anim_init`, which is called by `render_anim` after it creates the
 Cairo drawing context but before rendering any frames, in order to do any special setup
 that you need. Here it sets the drawing origin to the centre of the frame (for positioning
 the curve), clears the background to white, and sets a pen colour and size for the curve.
 HSV tends to be a more convenient space for experimenting with colours than RGB, which is
 why I prefer to specify colours in that space.
 
-If you try playing back the resulting animation from the above, it won’t look right.
-What happens is that the Lissajous curves from previous frames remain on succeeding
-frames instead of being erased, until the result at the end of the animation is a solid
-green square.
+If you try playing back the resulting animation from the above, it won’t look right. What
+happens is that the Lissajous curves from previous frames remain on succeeding frames
+instead of being erased, until the result at the end of the animation is a solid green
+square.
 
-What you want is to start with a white background for each frame. This can be done
-with a custom draw procedure as simple as
+What you want is to start with a white background for each frame. This can be done with a
+custom draw procedure as simple as
 
     def init_frame(g, t) :
         g.source_colour = qahirah.Colour.grey(1) # background colour
@@ -103,10 +104,11 @@ with a custom draw procedure as simple as
         g.source_colour = qahirah.Colour.from_hsva((0.25, 0.9, 0.9)) # curve colour
     #end init_frame
 
-(Note to be a draw procedure it has to take two arguments, even though it pays no attention
-to the second one.) Now we need a way to ensure this is invoked immediately prior to the
-lissa draw procedure for each frame. We can use draw_compose for this, to construct
-a draw procedure which invokes its first argument followed by its second argument:
+(Note to be a draw procedure it has to take two arguments, even though it pays no
+attention to the second one.) Now we need a way to ensure this is invoked immediately
+prior to the lissa draw procedure for each frame. We can use `draw_compose` for this, to
+construct a draw procedure which invokes its first argument followed by its second
+argument:
 
     anim.common.render_anim \
       (
@@ -120,18 +122,18 @@ a draw procedure which invokes its first argument followed by its second argumen
         start_frame_nr = 1
       )
 
-(Note the erasure of the background and setting of the pen colour in anim_init can now
-be removed, since it is just repeating what is being done in init_frame.) If you try
+(Note the erasure of the background and setting of the pen colour in `anim_init` can now
+be removed, since it is just repeating what is being done in `init_frame`.) If you try
 playing back the new frames, you should now see a nicely-animating clean Lissajous curve.
 
-Now, supposing we want to animate the colour of the curve. The draw procedure returned
-by anim.lissa.make_draw doesn’t have any option for adjusting Cairo settings like the
-pen size, colour etc; it simply uses whatever settings are currently in effect. To
-control these settings in an animated fashion, we can add a suitable set_source_colour
-call to our init_frame procedure, and animate it based on the second argument (which we
-were ignoring before). But since init_frame consists of nothing but Cairo calls, there
-is a convenience routine to make it easier to define the whole procedure, complete
-with animation:
+Now, supposing we want to animate the colour of the curve. The draw procedure returned by
+`anim.lissa.make_draw` doesn’t have any option for adjusting Cairo settings like the pen
+size, colour etc; it simply uses whatever settings are currently in effect. To control
+these settings in an animated fashion, we can add a suitable `set_source_colour` call to
+our `init_frame` procedure, and animate it based on the second argument (which we were
+ignoring before). But since `init_frame` consists of nothing but Cairo calls, there is a
+convenience routine to make it easier to define the whole procedure, complete with
+animation:
 
     init_frame = anim.common.make_draw \
       (
@@ -151,14 +153,15 @@ with animation:
         ),
       )
 
-Now the exact same render_anim call as before will produce a Lissajous animation
-where the curve goes through all the colours of the spectrum.
+Now the exact same `render_anim` call as before will produce a Lissajous animation where
+the curve goes through all the colours of the spectrum.
 
-Hopefully that gives you the flavour of the framework, and how easy it is to do
-some quite elaborate animations. By all means, delve further into it, try things out,
-and have fun.
+Hopefully that gives you the flavour of the framework, and how easy it is to do some quite
+elaborate animations. By all means, delve further into it, try things out, and have fun.
 
-Further code examples are available here: <https://github.com/ldo/anim_framework_examples>.
+Further code examples are available in my anim_framework_examples repo
+([GitLab](https://gitlab.com/ldo/anim_framework_examples),
+[GitHub](https://github.com/ldo/anim_framework_examples)).
 
 Lawrence D'Oliveiro <ldo@geek-central.gen.nz>
-2016 October 8
+2017 April 7
