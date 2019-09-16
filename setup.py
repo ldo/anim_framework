@@ -17,6 +17,6 @@ distutils.core.setup \
     description = "framework for scripted animations, for Python 3.3 or later",
     author = "Lawrence D'Oliveiro",
     author_email = "ldo@geek-central.gen.nz",
-    url = "http://github.com/ldo/anim_framework",
+    url = "https://github.com/ldo/anim_framework",
     packages = ["anim"],
   )
